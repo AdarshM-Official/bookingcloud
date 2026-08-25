@@ -1,0 +1,122 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}{{ business.business_name }} | BookingSaaS{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 pt-24 pb-12">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6">
+    <a href="{% url 'website:discover' %}" class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-800 mb-6 transition-colors">
+      <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Back to Discover
+    </a>
+    
+    <!-- Hero / Header -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+      <div class="h-64 sm:h-80 relative overflow-hidden bg-slate-100 flex">
+        {% if business.gallery_images.all %}
+          {% with first_img=business.gallery_images.all|first %}
+            <div class="w-full h-full relative">
+               <img src="{{ first_img.image.url }}" alt="{{ business.business_name }}" class="w-full h-full object-cover">
+               <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+            </div>
+          {% endwith %}
+        {% elif business.profile_image %}
+          <div class="w-full h-full relative">
+            <img src="{{ business.profile_image.url }}" alt="{{ business.business_name }}" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+          </div>
+        {% else %}
+          <div class="absolute inset-0 opacity-50" style="background-image: repeating-linear-gradient(45deg, #e2e8f0 25%, transparent 25%, transparent 75%, #e2e8f0 75%, #e2e8f0), repeating-linear-gradient(45deg, #e2e8f0 25%, #f8fafc 25%, #f8fafc 75%, #e2e8f0 75%, #e2e8f0); background-position: 0 0, 10px 10px; background-size: 20px 20px;"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+        {% endif %}
+
+        <div class="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div class="flex items-center gap-4">
+            {% if business.profile_image %}
+              <img src="{{ business.profile_image.url }}" alt="Logo" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-4 border-white shadow-lg object-cover bg-white">
+            {% endif %}
+            <div>
+              <div class="inline-block px-2 py-0.5 rounded text-xs font-bold bg-indigo-600 text-white uppercase tracking-wider mb-2">{{ business.category }}</div>
+              <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-none mb-1">{{ business.business_name }}</h1>
+              <p class="text-slate-200 font-medium flex items-center gap-1.5 text-sm sm:text-base mt-2">
+                <i data-lucide="map-pin" class="w-4 h-4"></i> {{ business.city|default:"Location not specified" }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Info Bar -->
+      <div class="bg-white px-6 py-4 border-b border-slate-100 flex flex-wrap gap-x-8 gap-y-4 text-sm font-medium text-slate-700">
+        {% if business.phone %}
+          <div class="flex items-center gap-2">
+            <i data-lucide="phone" class="w-4 h-4 text-slate-400"></i> {{ business.phone }}
+          </div>
+        {% endif %}
+        {% if business.email %}
+          <div class="flex items-center gap-2">
+            <i data-lucide="mail" class="w-4 h-4 text-slate-400"></i> {{ business.email }}
+          </div>
+        {% endif %}
+        {% if business.address %}
+          <div class="flex items-center gap-2">
+            <i data-lucide="map" class="w-4 h-4 text-slate-400"></i> {{ business.address }}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Description & Gallery Grid -->
+      <div class="p-6 sm:p-8">
+        {% if business.description %}
+          <div class="prose prose-slate max-w-none text-slate-600 mb-8">
+            {{ business.description|linebreaks }}
+          </div>
+        {% endif %}
+
+        {% if business.gallery_images.count > 1 %}
+          <h3 class="text-lg font-bold text-slate-900 mb-4">Gallery</h3>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {% for img in business.gallery_images.all %}
+              <a href="{{ img.image.url }}" target="_blank" class="block aspect-square rounded-xl overflow-hidden bg-slate-100 border border-slate-200 group">
+                <img src="{{ img.image.url }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+              </a>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Services Section -->
+    <h2 class="text-2xl font-extrabold text-slate-900 mb-6 flex items-center gap-2">
+      <i data-lucide="calendar-check" class="w-6 h-6 text-indigo-600"></i> Book a Service
+    </h2>
+    
+    <div class="space-y-4">
+      {% for service in services %}
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-indigo-200 hover:shadow-md transition-all">
+          <div class="flex-1">
+            <h3 class="text-lg font-bold text-slate-900 mb-1">{{ service.service_name }}</h3>
+            <p class="text-sm font-medium text-slate-500 mb-2 flex items-center gap-4">
+              <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4"></i> {{ service.duration }} mins</span>
+            </p>
+            {% if service.description %}
+              <p class="text-sm text-slate-600 line-clamp-2">{{ service.description }}</p>
+            {% endif %}
+          </div>
+          <div class="flex sm:flex-col items-center sm:items-end justify-between gap-4 sm:gap-2 shrink-0">
+            <div class="text-xl font-extrabold text-indigo-600">₹{{ service.price }}</div>
+            <a href="{% url 'website:book_service' service.id %}" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors shadow-sm shadow-indigo-200 whitespace-nowrap text-sm">
+              Book Appointment
+            </a>
+          </div>
+        </div>
+      {% empty %}
+        <div class="text-center py-12 bg-white rounded-2xl border border-slate-200">
+          <i data-lucide="inbox" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
+          <h3 class="font-bold text-slate-900">No services available</h3>
+          <p class="text-sm text-slate-500">This business hasn't listed any services yet.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

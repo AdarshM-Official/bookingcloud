@@ -1,0 +1,392 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  BookingSaaS - Book Services & Manage Your Business
+{% endblock %}
+
+{% block content %}
+  <style>
+    /* Internal CSS for Animations */
+    @keyframes float {
+      0% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-15px);
+      }
+      100% {
+        transform: translateY(0px);
+      }
+    }
+    .animate-float-1 {
+      animation: float 6s ease-in-out infinite;
+    }
+    .animate-float-2 {
+      animation: float 6s ease-in-out infinite;
+      animation-delay: -3s;
+    }
+    .mockup-grid-bg {
+      background-size: 40px 40px;
+      background-image: linear-gradient(to right, #f1f5f9 1px, transparent 1px), linear-gradient(to bottom, #f1f5f9 1px, transparent 1px);
+    }
+  </style>
+
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden bg-white">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 mockup-grid-bg opacity-50"></div>
+
+    <div class="max-w-7xl mx-auto px-6 pt-24 pb-32 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <!-- Hero Text -->
+      <div class="max-w-xl mx-auto lg:mx-0 text-center lg:text-left">
+        <div class="inline-block px-4 py-1.5 rounded-full bg-indigo-50 text-indigo-600 font-semibold text-sm mb-6 border border-indigo-100 shadow-sm">✨ The modern booking platform</div>
+        <h1 class="text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6">
+          Booking made simple.<br />
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500">For everyone.</span>
+        </h1>
+        <p class="text-lg text-slate-600 mb-10 leading-relaxed">Discover trusted services, choose a convenient time, and book instantly. Businesses can manage their services and appointments from one simple dashboard.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
+          <a href="{% url 'website:discover' %}" class="px-8 py-4 bg-indigo-600 text-white rounded-xl font-semibold shadow-lg shadow-indigo-200 hover:-translate-y-0.5 hover:shadow-xl transition-all text-center">Find a Service</a>
+          <a href="{% url 'website:auth' %}" class="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold hover:bg-slate-50 transition-all text-center">List Your Business</a>
+        </div>
+        <div class="flex items-center justify-center lg:justify-start gap-2 text-sm text-slate-500 font-medium">
+          <i data-lucide="check-circle" class="w-5 h-5 text-indigo-600"></i> No phone calls. No waiting. Just book.
+        </div>
+      </div>
+
+      <!-- Hero Visual Mockup -->
+      <div class="relative w-full max-w-lg mx-auto">
+        <!-- Floating Element 1 -->
+        <div class="absolute -top-6 -right-6 md:-right-12 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-4 z-20 animate-float-1">
+          <div class="w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center">
+            <i data-lucide="check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="font-bold text-slate-900 text-sm">Booking Confirmed</div>
+            <div class="text-xs text-slate-500">See you at 10:00 AM</div>
+          </div>
+        </div>
+
+        <!-- Main Mockup Card -->
+        <div class="bg-white rounded-[2rem] shadow-2xl border border-slate-100 p-6 md:p-8 relative z-10">
+          <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+            <div class="font-bold text-slate-900">Find Services</div>
+            <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-400"></i>
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl flex items-center gap-3 text-slate-400 text-sm mb-6 border border-slate-100">
+            <i data-lucide="search" class="w-4 h-4"></i> Search for haircuts, plumbing...
+          </div>
+
+          <div class="mb-6">
+            <div class="font-bold text-lg text-slate-900 mb-1">Glow Studio</div>
+            <div class="text-amber-500 text-sm font-medium mb-3">★ 4.9 (128 reviews)</div>
+            <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <div>
+                <div class="font-semibold text-slate-900">Haircut & Styling</div>
+                <div class="text-sm text-slate-500">45 min</div>
+              </div>
+              <div class="font-bold text-indigo-600">?45</div>
+            </div>
+          </div>
+
+          <div class="font-bold text-slate-900 mb-3">Select a time today</div>
+          <div class="grid grid-cols-3 gap-2 md:gap-3 mb-8">
+            <div class="bg-indigo-600 text-white text-center py-2 rounded-lg text-sm font-semibold shadow-sm cursor-pointer">10:00 AM</div>
+            <div class="bg-white border border-slate-200 text-slate-600 text-center py-2 rounded-lg text-sm font-medium hover:border-indigo-600 cursor-pointer transition-colors">11:30 AM</div>
+            <div class="bg-white border border-slate-200 text-slate-600 text-center py-2 rounded-lg text-sm font-medium hover:border-indigo-600 cursor-pointer transition-colors">2:00 PM</div>
+          </div>
+
+          <div class="w-full bg-slate-900 text-white text-center py-3.5 rounded-xl font-bold cursor-pointer hover:bg-slate-800 transition-colors">Book Appointment</div>
+        </div>
+
+        <!-- Floating Element 2 -->
+        <div class="absolute -bottom-10 -left-6 md:-left-12 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-4 z-20 animate-float-2">
+          <div class="w-10 h-10 bg-amber-500 text-white rounded-full flex items-center justify-center">
+            <i data-lucide="calendar" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="font-bold text-slate-900 text-sm">Available Today</div>
+            <div class="text-xs text-slate-500">3 slots remaining</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Category Discovery Section -->
+  <section class="py-24 bg-slate-50 border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-16 max-w-2xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">Find what you need</h2>
+        <p class="text-lg text-slate-600">Explore top-rated professionals and businesses in your area, ready to help you.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div onclick="window.location.href='{% url 'website:discover' %}'" class="bg-white p-8 rounded-2xl border border-slate-200 text-center cursor-pointer hover:border-indigo-600 hover:shadow-xl hover:-translate-y-1 transition-all group">
+          <div class="w-14 h-14 mx-auto bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <i data-lucide="scissors" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-lg">Beauty & Salon</h3>
+        </div>
+        <div onclick="window.location.href='{% url 'website:discover' %}'" class="bg-white p-8 rounded-2xl border border-slate-200 text-center cursor-pointer hover:border-indigo-600 hover:shadow-xl hover:-translate-y-1 transition-all group">
+          <div class="w-14 h-14 mx-auto bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <i data-lucide="activity" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-lg">Healthcare</h3>
+        </div>
+        <div onclick="window.location.href='{% url 'website:discover' %}'" class="bg-white p-8 rounded-2xl border border-slate-200 text-center cursor-pointer hover:border-indigo-600 hover:shadow-xl hover:-translate-y-1 transition-all group">
+          <div class="w-14 h-14 mx-auto bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <i data-lucide="dumbbell" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-lg">Fitness</h3>
+        </div>
+        <div onclick="window.location.href='{% url 'website:discover' %}'" class="bg-white p-8 rounded-2xl border border-slate-200 text-center cursor-pointer hover:border-indigo-600 hover:shadow-xl hover:-translate-y-1 transition-all group">
+          <div class="w-14 h-14 mx-auto bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-lg">Education</h3>
+        </div>
+        <div onclick="window.location.href='{% url 'website:discover' %}'" class="bg-white p-8 rounded-2xl border border-slate-200 text-center cursor-pointer hover:border-indigo-600 hover:shadow-xl hover:-translate-y-1 transition-all group">
+          <div class="w-14 h-14 mx-auto bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <i data-lucide="briefcase" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-lg">Consulting</h3>
+        </div>
+        <div onclick="window.location.href='{% url 'website:discover' %}'" class="bg-white p-8 rounded-2xl border border-slate-200 text-center cursor-pointer hover:border-indigo-600 hover:shadow-xl hover:-translate-y-1 transition-all group">
+          <div class="w-14 h-14 mx-auto bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <i data-lucide="home" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-lg">Home Services</h3>
+        </div>
+        <div onclick="window.location.href='{% url 'website:discover' %}'" class="bg-white p-8 rounded-2xl border border-slate-200 text-center cursor-pointer hover:border-indigo-600 hover:shadow-xl hover:-translate-y-1 transition-all group">
+          <div class="w-14 h-14 mx-auto bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <i data-lucide="wrench" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-lg">Repair</h3>
+        </div>
+        <div onclick="window.location.href='{% url 'website:discover' %}'" class="bg-indigo-600 p-8 rounded-2xl border border-indigo-600 text-center cursor-pointer hover:bg-indigo-700 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col justify-center items-center">
+          <div class="w-14 h-14 mx-auto bg-white/20 text-white rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <i data-lucide="arrow-right" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-white text-lg">Explore all</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-20 max-w-2xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">How BookingSaaS Works</h2>
+        <p class="text-lg text-slate-600">We've streamlined the entire process so you can get things done faster.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+        <!-- Connecting Line (Desktop) -->
+        <div class="hidden md:block absolute top-1/2 left-[15%] right-[15%] h-0.5 bg-slate-100 -translate-y-1/2 z-0"></div>
+
+        <div class="bg-white p-10 rounded-[2rem] border border-slate-100 shadow-sm relative z-10 text-center">
+          <div class="text-indigo-600 font-black text-sm tracking-widest uppercase mb-4">01</div>
+          <h3 class="text-2xl font-bold text-slate-900 mb-4">Discover</h3>
+          <p class="text-slate-600">Find businesses and services that match your exact needs, read reviews, and compare prices.</p>
+        </div>
+        <div class="bg-white p-10 rounded-[2rem] border border-slate-100 shadow-sm relative z-10 text-center">
+          <div class="text-indigo-600 font-black text-sm tracking-widest uppercase mb-4">02</div>
+          <h3 class="text-2xl font-bold text-slate-900 mb-4">Pick a time</h3>
+          <p class="text-slate-600">View real-time availability calendars and select a convenient slot that works for your schedule.</p>
+        </div>
+        <div class="bg-white p-10 rounded-[2rem] border border-slate-100 shadow-sm relative z-10 text-center">
+          <div class="text-indigo-600 font-black text-sm tracking-widest uppercase mb-4">03</div>
+          <h3 class="text-2xl font-bold text-slate-900 mb-4">You're booked</h3>
+          <p class="text-slate-600">Confirm your appointment instantly. Manage, reschedule, or cancel entirely online.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Preview Section -->
+  <section class="py-24 bg-slate-50">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="bg-white rounded-[2rem] p-8 md:p-12 shadow-xl border border-slate-100">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 pb-6 border-b border-slate-100 gap-4">
+          <h2 class="text-2xl font-extrabold text-slate-900">Live Booking Preview</h2>
+          <div class="flex items-center gap-2 text-sm font-medium text-slate-400">
+            <span class="text-indigo-600 font-bold">Service</span>
+            <i data-lucide="chevron-right" class="w-4 h-4"></i> Date
+            <i data-lucide="chevron-right" class="w-4 h-4"></i> Time
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div>
+            <div class="bg-indigo-50/50 p-6 rounded-2xl border-2 border-indigo-600 mb-4 cursor-pointer transition-all hover:bg-indigo-50">
+              <h3 class="text-lg font-bold text-slate-900 mb-1">Deep Tissue Massage</h3>
+              <div class="text-sm text-slate-500 mb-4">60 min session</div>
+              <div class="text-xl font-extrabold text-indigo-600">?85</div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 cursor-pointer transition-all hover:border-slate-300 hover:bg-slate-50">
+              <h3 class="text-lg font-bold text-slate-900 mb-1">Swedish Massage</h3>
+              <div class="text-sm text-slate-500 mb-4">60 min session</div>
+              <div class="text-xl font-extrabold text-slate-900">?75</div>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 mb-6">Available Times - Today</h3>
+            <div class="grid grid-cols-2 gap-4 mb-8">
+              <button class="w-full py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold hover:border-indigo-600 transition-colors">09:00 AM</button>
+              <button class="w-full py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold hover:border-indigo-600 transition-colors">10:30 AM</button>
+              <button class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-md shadow-indigo-200">01:00 PM</button>
+              <button class="w-full py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold hover:border-indigo-600 transition-colors">03:30 PM</button>
+            </div>
+            <button class="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200">Continue to Confirmation</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- For Businesses -->
+  <section id="business" class="py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="bg-slate-900 rounded-[3rem] p-10 md:p-20 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center text-white relative overflow-hidden shadow-2xl">
+        <!-- Background elements -->
+        <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+
+        <div class="relative z-10 text-center lg:text-left">
+          <h2 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">Your schedule.<br />Your business.<br /><span class="text-indigo-400">One place.</span></h2>
+          <p class="text-lg text-slate-300 mb-10 leading-relaxed max-w-lg mx-auto lg:mx-0">Stop juggling phone calls, text messages, and paper calendars. BookingSaaS gives you the tools to list your services, set your exact availability, and accept online bookings 24/7.</p>
+          <ul class="space-y-4 mb-10 text-left max-w-md mx-auto lg:mx-0">
+            <li class="flex items-center gap-3 text-slate-200 font-medium">
+              <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 shrink-0"></i> Reduce manual scheduling
+            </li>
+            <li class="flex items-center gap-3 text-slate-200 font-medium">
+              <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 shrink-0"></i> Organize customer details
+            </li>
+            <li class="flex items-center gap-3 text-slate-200 font-medium">
+              <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 shrink-0"></i> Manage appointments on the go
+            </li>
+          </ul>
+          <a href="{% url 'website:auth' %}" class="inline-block px-8 py-4 bg-white text-slate-900 rounded-xl font-bold hover:bg-slate-50 transition-colors shadow-lg">Start accepting bookings</a>
+        </div>
+
+        <div class="relative z-10 bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20 shadow-2xl max-w-md mx-auto w-full">
+          <div class="flex justify-between items-center mb-8 pb-4 border-b border-white/10">
+            <h3 class="text-xl font-bold">Dashboard</h3>
+            <div class="bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full text-xs font-bold border border-indigo-500/30">Active</div>
+          </div>
+
+          <div class="flex gap-4 mb-8">
+            <div class="flex-1 bg-black/20 p-5 rounded-2xl">
+              <div class="text-sm text-slate-400 font-medium mb-1">Today's Bookings</div>
+              <div class="text-3xl font-extrabold text-white">12</div>
+            </div>
+            <div class="flex-1 bg-black/20 p-5 rounded-2xl">
+              <div class="text-sm text-slate-400 font-medium mb-1">Revenue</div>
+              <div class="text-3xl font-extrabold text-emerald-400">?480</div>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <div class="bg-black/20 p-4 rounded-xl flex justify-between items-center">
+              <div>
+                <div class="font-bold text-white">Sarah Jenkins</div>
+                <div class="text-sm text-slate-400">Hair Coloring • 2:00 PM</div>
+              </div>
+              <button class="px-4 py-2 bg-white/10 hover:bg-white/20 transition-colors rounded-lg text-sm font-medium border border-white/10">Manage</button>
+            </div>
+            <div class="bg-black/20 p-4 rounded-xl flex justify-between items-center">
+              <div>
+                <div class="font-bold text-white">Mike Ross</div>
+                <div class="text-sm text-slate-400">Beard Trim • 3:30 PM</div>
+              </div>
+              <button class="px-4 py-2 bg-white/10 hover:bg-white/20 transition-colors rounded-lg text-sm font-medium border border-white/10">Manage</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <section id="features" class="py-24 bg-slate-50 border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-20 max-w-2xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">Everything you need</h2>
+        <p class="text-lg text-slate-600">Powerful features designed to make booking and management effortless.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+        <div class="flex gap-6">
+          <div class="w-12 h-12 shrink-0 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center">
+            <i data-lucide="calendar" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Smart Scheduling</h3>
+            <p class="text-slate-600 leading-relaxed">Organize appointments without manual coordination or double bookings.</p>
+          </div>
+        </div>
+        <div class="flex gap-6">
+          <div class="w-12 h-12 shrink-0 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center">
+            <i data-lucide="search" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Service Discovery</h3>
+            <p class="text-slate-600 leading-relaxed">Customers can easily find businesses and services that match their needs.</p>
+          </div>
+        </div>
+        <div class="flex gap-6">
+          <div class="w-12 h-12 shrink-0 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center">
+            <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Business Dashboard</h3>
+            <p class="text-slate-600 leading-relaxed">Manage services, staff, and bookings from one centralized location.</p>
+          </div>
+        </div>
+        <div class="flex gap-6">
+          <div class="w-12 h-12 shrink-0 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center">
+            <i data-lucide="clock" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Flexible Availability</h3>
+            <p class="text-slate-600 leading-relaxed">Businesses control exactly when customers can book appointments.</p>
+          </div>
+        </div>
+        <div class="flex gap-6">
+          <div class="w-12 h-12 shrink-0 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center">
+            <i data-lucide="edit-3" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Booking Management</h3>
+            <p class="text-slate-600 leading-relaxed">Customers and businesses can effortlessly manage, modify, or cancel appointments.</p>
+          </div>
+        </div>
+        <div class="flex gap-6">
+          <div class="w-12 h-12 shrink-0 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center">
+            <i data-lucide="shield" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Secure Accounts</h3>
+            <p class="text-slate-600 leading-relaxed">Separate customer and business experiences with secure authentication.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="py-32 bg-white text-center border-t border-slate-200">
+    <div class="max-w-3xl mx-auto px-6">
+      <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6">Ready to make booking easier?</h2>
+      <p class="text-xl text-slate-600 mb-10">Join thousands of businesses and customers who have simplified their scheduling.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="{% url 'website:discover' %}" class="px-8 py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">Find a Service</a>
+        <a href="{% url 'website:auth' %}" class="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-bold hover:bg-slate-50 transition-colors">List Your Business</a>
+      </div>
+    </div>
+  </section>
+{% endblock %}

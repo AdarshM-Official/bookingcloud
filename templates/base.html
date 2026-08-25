@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}
+        BookingSaaS - Modern Booking Platform
+      {% endblock %}
+    </title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif']
+            },
+            colors: {
+              primary: '#4F46E5',
+              'primary-hover': '#4338CA'
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Internal CSS for base layout components -->
+    <style>
+      /* Mobile Menu Toggle Logic */
+      #nav-menu {
+        display: none;
+      }
+      #nav-menu.active {
+        display: flex;
+      }
+      @media (min-width: 768px) {
+        #nav-menu {
+          display: flex !important;
+        }
+      }
+    </style>
+
+    {% block extra_head %}
+
+    {% endblock %}
+  </head>
+  <body class="bg-slate-50 text-slate-900 font-sans antialiased overflow-x-hidden">
+    <!-- Navbar -->
+    <nav id="navbar" class="fixed w-full top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 transition-shadow duration-300">
+      <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="text-2xl font-extrabold text-indigo-600 tracking-tight">
+          <a href="{% url 'website:index' %}">BookingSaaS</a>
+        </div>
+
+        <button class="md:hidden text-slate-800 focus:outline-none" onclick="toggleMenu()" aria-label="Toggle menu"><i data-lucide="menu" class="w-6 h-6"></i></button>
+
+        <!-- Desktop & Mobile Menu -->
+        <div id="nav-menu" class="absolute top-full left-0 w-full bg-white border-b border-gray-200 md:static md:w-auto md:bg-transparent md:border-none flex-col md:flex-row gap-6 p-6 md:p-0 shadow-lg md:shadow-none items-center">
+          <div class="flex flex-col md:flex-row gap-6 items-center w-full md:w-auto">
+            <a href="{% url 'website:index' %}" class="text-slate-600 font-medium hover:text-indigo-600 transition-colors">Home</a>
+            <a href="{% url 'website:discover' %}" class="text-slate-600 font-medium hover:text-indigo-600 transition-colors">Discover</a>
+            <a href="{% url 'website:index' %}#how-it-works" class="text-slate-600 font-medium hover:text-indigo-600 transition-colors">How It Works</a>
+            <a href="{% url 'website:index' %}#features" class="text-slate-600 font-medium hover:text-indigo-600 transition-colors">Features</a>
+            <a href="{% url 'website:index' %}#business" class="text-slate-600 font-medium hover:text-indigo-600 transition-colors">For Business</a>
+          </div>
+
+          <div class="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t border-gray-100 md:border-none">
+            {% if user.is_authenticated %}
+              {% if user.role == 'business' %}
+                <a href="{% url 'dashboard:index' %}" class="px-5 py-2.5 rounded-lg border border-gray-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors w-full md:w-auto text-center">Dashboard</a>
+              {% else %}
+                <a href="{% url 'website:my_bookings' %}" class="px-5 py-2.5 rounded-lg border border-gray-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors w-full md:w-auto text-center">My Bookings</a>
+              {% endif %}
+              <a href="{% url 'website:logout' %}" class="px-5 py-2.5 rounded-lg bg-slate-900 text-white font-medium hover:bg-slate-800 transition-colors w-full md:w-auto text-center">Logout</a>
+            {% else %}
+              <a href="{% url 'website:auth' %}" class="px-5 py-2.5 rounded-lg border border-gray-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors w-full md:w-auto text-center">Log In</a>
+              <a href="{% url 'website:auth' %}" class="px-5 py-2.5 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors shadow-sm w-full md:w-auto text-center">Get Started</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20">
+      <!-- Padding top to account for fixed navbar -->
+      {% block content %}
+
+      {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 pt-20 pb-10 mt-20">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
+          <div class="lg:col-span-2">
+            <h3 class="text-2xl font-extrabold text-indigo-600 mb-4">BookingSaaS</h3>
+            <p class="text-slate-500 leading-relaxed max-w-sm">The modern platform for discovering services and managing business appointments seamlessly. No phone calls. No waiting. Just book.</p>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-900 mb-6">Platform</h4>
+            <ul class="space-y-4">
+              <li>
+                <a href="{% url 'website:discover' %}" class="text-slate-500 hover:text-indigo-600 transition-colors">Discover</a>
+              </li>
+              <li>
+                <a href="{% url 'website:index' %}#how-it-works" class="text-slate-500 hover:text-indigo-600 transition-colors">How It Works</a>
+              </li>
+              <li>
+                <a href="{% url 'website:index' %}#features" class="text-slate-500 hover:text-indigo-600 transition-colors">Features</a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-900 mb-6">Business</h4>
+            <ul class="space-y-4">
+              <li>
+                <a href="{% url 'website:auth' %}" class="text-slate-500 hover:text-indigo-600 transition-colors">List Your Business</a>
+              </li>
+              <li>
+                <a href="{% url 'website:auth' %}" class="text-slate-500 hover:text-indigo-600 transition-colors">Business Login</a>
+              </li>
+              <li>
+                <a href="{% url 'dashboard:index' %}" class="text-slate-500 hover:text-indigo-600 transition-colors">Dashboard</a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-900 mb-6">Company & Legal</h4>
+            <ul class="space-y-4">
+              <li>
+                <a href="#" class="text-slate-500 hover:text-indigo-600 transition-colors">About</a>
+              </li>
+              <li>
+                <a href="#" class="text-slate-500 hover:text-indigo-600 transition-colors">Contact</a>
+              </li>
+              <li>
+                <a href="#" class="text-slate-500 hover:text-indigo-600 transition-colors">Privacy</a>
+              </li>
+              <li>
+                <a href="#" class="text-slate-500 hover:text-indigo-600 transition-colors">Terms</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gray-100 gap-4">
+          <div class="text-slate-400 text-sm">&copy; {{ year|default:'2026' }} BookingSaaS. All rights reserved.</div>
+          <div class="flex gap-6">
+            <a href="#" class="text-slate-400 hover:text-slate-600 transition-colors" aria-label="Twitter"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+            <a href="#" class="text-slate-400 hover:text-slate-600 transition-colors" aria-label="Instagram"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+            <a href="#" class="text-slate-400 hover:text-slate-600 transition-colors" aria-label="Facebook"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Initialize Icons & Menu Script -->
+    <script>
+      lucide.createIcons()
+      
+      function toggleMenu() {
+        const menu = document.getElementById('nav-menu')
+        menu.classList.toggle('active')
+      }
+      
+      // Navbar scroll effect
+      window.addEventListener('scroll', () => {
+        const navbar = document.getElementById('navbar')
+        if (window.scrollY > 10) {
+          navbar.classList.add('shadow-sm')
+        } else {
+          navbar.classList.remove('shadow-sm')
+        }
+      })
+    </script>
+    {% block extra_js %}
+
+    {% endblock %}
+  </body>
+</html>

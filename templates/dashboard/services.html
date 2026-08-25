@@ -1,0 +1,79 @@
+{% extends 'dashboard/base.html' %}
+
+{% block page_title %}
+  Services
+{% endblock %}
+{% block breadcrumbs %}
+  <span class="mx-2 text-slate-300">/</span>
+  <span class="text-slate-500">Manage</span>
+{% endblock %}
+
+{% block content %}
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Services</h1>
+      <p class="text-slate-500 font-medium mt-1">Manage your business services and pricing.</p>
+    </div>
+    <a href="{% url 'dashboard:service_add' %}" class="flex items-center gap-2 bg-brand-600 text-white font-bold px-4 py-2.5 rounded-lg shadow-sm shadow-brand-200 hover:bg-brand-700 transition-colors"><i data-lucide="plus" class="w-4 h-4"></i> Add Service</a>
+  </div>
+
+  {% if messages %}
+    <div class="mb-6 space-y-2">
+      {% for message in messages %}
+        <div class="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 font-medium text-sm flex items-center gap-2">
+          <i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+    <div class="p-5 border-b border-slate-100">
+      <h3 class="font-extrabold text-slate-900 text-lg">All Services</h3>
+    </div>
+    {% if services %}
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-bold">
+              <th class="px-6 py-4 border-b border-slate-100">Service Name</th>
+              <th class="px-6 py-4 border-b border-slate-100">Duration</th>
+              <th class="px-6 py-4 border-b border-slate-100">Price</th>
+              <th class="px-6 py-4 border-b border-slate-100 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for service in services %}
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-4">
+                  <div class="font-bold text-slate-900">{{ service.service_name }}</div>
+                  {% if service.description %}
+                    <div class="text-xs text-slate-500 mt-1 max-w-sm truncate">{{ service.description }}</div>
+                  {% endif %}
+                </td>
+                <td class="px-6 py-4 text-sm font-medium text-slate-700">{{ service.duration }} mins</td>
+                <td class="px-6 py-4 text-sm font-bold text-slate-900">₹{{ service.price }}</td>
+                <td class="px-6 py-4 text-right">
+                  <form action="{% url 'dashboard:service_delete' service.pk %}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this service?');">
+                    {% csrf_token %}
+                    <button type="submit" class="text-slate-400 hover:text-red-600 p-2 rounded-lg hover:bg-red-50 transition-colors" title="Delete Service"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="flex flex-col items-center justify-center text-center py-16 px-4">
+        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+          <i data-lucide="layers" class="w-8 h-8 text-slate-300"></i>
+        </div>
+        <h3 class="font-bold text-slate-900 text-lg mb-1">No services found</h3>
+        <p class="text-slate-500 font-medium text-sm max-w-sm mb-6">You haven't added any services yet. Start by creating your first service offering.</p>
+        <a href="{% url 'dashboard:service_add' %}" class="inline-flex items-center gap-2 bg-white text-slate-700 font-bold px-4 py-2.5 rounded-lg border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors"><i data-lucide="plus" class="w-4 h-4"></i> Add Your First Service</a>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

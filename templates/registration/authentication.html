@@ -1,0 +1,366 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Authentication - BookingSaaS
+{% endblock %}
+
+{% block content %}
+  <style>
+    /* Internal CSS for Auth specific logic */
+    .auth-form {
+      display: none;
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+    .auth-form.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Role Selection Cards */
+    .role-card input[type='radio'] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .role-card:has(input[type='radio']:checked) {
+      border-color: #4f46e5;
+      background-color: #eef2ff;
+      box-shadow: 0 0 0 1px #4f46e5;
+    }
+    .role-card:has(input[type='radio']:checked) .role-icon {
+      color: #4f46e5;
+    }
+    
+    /* Float Animation */
+    @keyframes authFloat {
+      0% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+      100% {
+        transform: translateY(0px);
+      }
+    }
+    .animate-auth-float {
+      animation: authFloat 6s ease-in-out infinite;
+    }
+  </style>
+
+  <!-- Wrapper taking up remaining viewport height beneath fixed navbar -->
+  <div class="flex min-h-[calc(100vh-5rem)]">
+    <!-- Brand Visual (Left side on desktop) -->
+    <div class="hidden lg:flex lg:flex-1 bg-slate-50 flex-col justify-center items-center p-12 relative overflow-hidden border-r border-slate-200">
+      <div class="max-w-md text-center z-10">
+        <h1 class="text-4xl font-extrabold text-indigo-600 mb-12 leading-tight tracking-tight">Appointments without the back-and-forth.</h1>
+
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-slate-100 animate-auth-float text-left relative z-20">
+          <div class="flex items-center gap-4 mb-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
+            <div class="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center shrink-0 shadow-sm">
+              <i data-lucide="check" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="font-bold text-slate-900">Appointment Confirmed</div>
+              <div class="text-sm text-slate-500 font-medium">Today at 2:00 PM</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100 opacity-70">
+            <div class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center shrink-0 shadow-sm">
+              <i data-lucide="calendar" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="font-bold text-slate-900">Sync to Calendar</div>
+              <div class="text-sm text-slate-500 font-medium">Google, Outlook, Apple</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Background grid decoration -->
+      <div class="absolute inset-0 opacity-[0.15] z-0" style="background-image: radial-gradient(#4F46E5 1px, transparent 1px); background-size: 32px 32px;"></div>
+    </div>
+
+    <!-- Forms Container (Right side on desktop) -->
+    <div class="w-full lg:w-1/2 flex flex-col justify-center px-8 sm:px-16 py-12 bg-white">
+      <div class="max-w-md w-full mx-auto">
+        <!-- Login Form -->
+        <div id="login-container" class="auth-form active">
+          <div class="mb-10">
+            <h2 class="text-3xl font-extrabold text-slate-900 mb-2 tracking-tight">Welcome back</h2>
+            <p class="text-slate-500 font-medium">Sign in to continue to BookingSaaS.</p>
+          </div>
+
+          {% if not show_otp_form %}
+            <div id="login-options-grid" class="grid grid-cols-2 gap-4 mb-6">
+              <button type="button" class="flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                </svg>Google
+              </button>
+              <button type="button" onclick="togglePhoneLogin()" class="flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+                <i data-lucide="phone" class="w-5 h-5 text-indigo-600"></i>
+                Phone
+              </button>
+            </div>
+
+            <div id="login-divider" class="relative flex items-center mb-8">
+              <div class="flex-grow border-t border-slate-200"></div>
+              <span class="flex-shrink-0 px-4 text-sm font-bold text-slate-400 uppercase tracking-wider">or continue with email</span>
+              <div class="flex-grow border-t border-slate-200"></div>
+            </div>
+
+            <div id="login-email-form">
+              <form action="{% url 'website:auth' %}" method="POST" class="space-y-5">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="login" />
+
+                {% if messages %}
+                  <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-md mb-6">
+                    {% for message in messages %}
+                      <p class="text-red-700 text-sm font-medium">{{ message }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
+                <div>
+                  <label class="block text-sm font-bold text-slate-900 mb-2" for="login-username">Username / Email</label>
+                  <input type="text" id="login-username" name="username" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all" required />
+                </div>
+
+                <div class="relative">
+                  <label class="block text-sm font-bold text-slate-900 mb-2" for="login-password">Password</label>
+                  <input type="password" id="login-password" name="password" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all pr-12" required />
+                  <button type="button" class="absolute right-3 top-[34px] text-slate-400 hover:text-slate-600 p-1" onclick="togglePassword('login-password')"><i data-lucide="eye" class="w-5 h-5"></i></button>
+                </div>
+
+                <div class="flex items-center justify-between text-sm pt-2">
+                  <label class="flex items-center gap-2 cursor-pointer text-slate-600 font-medium select-none"><input type="checkbox" name="remember" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 border-slate-300" />Remember me</label>
+                  <a href="#" class="text-indigo-600 font-bold hover:text-indigo-800 transition-colors">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 mt-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">Log In</button>
+              </form>
+            </div>
+
+            <div id="login-phone-form" class="hidden">
+              <form action="{% url 'website:auth' %}" method="POST" class="space-y-5">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="request_otp" />
+
+                {% if messages %}
+                  <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-md mb-6">
+                    {% for message in messages %}
+                      <p class="text-red-700 text-sm font-medium">{{ message }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
+                <div>
+                  <label class="block text-sm font-bold text-slate-900 mb-2">Phone Number</label>
+                  <input type="text" name="phone_number" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all" placeholder="+1 (555) 000-0000" required />
+                </div>
+                <button type="submit" class="w-full py-3.5 mt-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">Send OTP</button>
+                <button type="button" onclick="togglePhoneLogin()" class="w-full py-3 mt-2 bg-white text-slate-600 font-bold hover:text-slate-900 transition-colors text-sm">Back to Email Login</button>
+              </form>
+            </div>
+          {% endif %}
+
+          {% if show_otp_form %}
+            <div id="verify-otp-form">
+              {% if messages %}
+                <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-md mb-6">
+                  {% for message in messages %}
+                    <p class="text-red-700 text-sm font-medium">{{ message }}</p>
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <form action="{% url 'website:auth' %}" method="POST" class="space-y-5">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="verify_otp" />
+                <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl mb-4 text-sm text-indigo-800 font-medium text-center">
+                  We've sent a code to <span class="font-bold">{{ phone_number }}</span>
+                </div>
+                <div>
+                  <label class="block text-sm font-bold text-slate-900 mb-2 text-center">Enter 6-digit OTP</label>
+                  <input type="text" name="otp" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all tracking-[0.5em] text-center text-xl font-mono" maxlength="6" required autocomplete="off" />
+                </div>
+                <button type="submit" class="w-full py-3.5 mt-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">Verify & Login</button>
+                <a href="{% url 'website:auth' %}" class="block text-center w-full py-3 mt-2 bg-white text-slate-600 font-bold hover:text-slate-900 transition-colors text-sm">Cancel</a>
+              </form>
+            </div>
+          {% endif %}
+
+          {% if not show_otp_form %}
+            <div class="text-center mt-8 text-slate-500 font-medium">
+              New to BookingSaaS? <button type="button" class="text-indigo-600 font-bold hover:text-indigo-800 transition-colors ml-1" onclick="switchForm('register')">Create an account</button>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-container" class="auth-form">
+          <div class="mb-8">
+            <h2 class="text-3xl font-extrabold text-slate-900 mb-2 tracking-tight">Create your account</h2>
+            <p class="text-slate-500 font-medium">Join BookingSaaS to get started.</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mb-6">
+            <button type="button" class="flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+              </svg>Google
+            </button>
+            <button type="button" onclick="switchForm('login'); togglePhoneLogin();" class="flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+              <i data-lucide="phone" class="w-5 h-5 text-indigo-600"></i>
+              Phone
+            </button>
+          </div>
+
+          <div class="relative flex items-center mb-8">
+            <div class="flex-grow border-t border-slate-200"></div>
+            <span class="flex-shrink-0 px-4 text-sm font-bold text-slate-400 uppercase tracking-wider">or continue with email</span>
+            <div class="flex-grow border-t border-slate-200"></div>
+          </div>
+
+          <form action="{% url 'website:auth' %}" method="POST" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="register" />
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <label class="role-card relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-indigo-600 hover:bg-slate-50 transition-all">
+                <input type="radio" name="role" value="customer" checked />
+                <div>
+                  <div class="flex items-center gap-2 font-bold text-slate-900 mb-1 role-icon transition-colors">
+                    <i data-lucide="user" class="w-5 h-5"></i> Customer
+                  </div>
+                  <div class="text-xs text-slate-500 font-medium leading-relaxed">Discover and book services.</div>
+                </div>
+              </label>
+
+              <label class="role-card relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-indigo-600 hover:bg-slate-50 transition-all">
+                <input type="radio" name="role" value="business" />
+                <div>
+                  <div class="flex items-center gap-2 font-bold text-slate-900 mb-1 role-icon transition-colors">
+                    <i data-lucide="briefcase" class="w-5 h-5"></i> Business
+                  </div>
+                  <div class="text-xs text-slate-500 font-medium leading-relaxed">Offer services and manage bookings.</div>
+                </div>
+              </label>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-bold text-slate-900 mb-2" for="reg-firstname">First Name</label>
+                <input type="text" id="reg-firstname" name="first_name" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all" required />
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-slate-900 mb-2" for="reg-lastname">Last Name</label>
+                <input type="text" id="reg-lastname" name="last_name" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all" required />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-slate-900 mb-2" for="reg-username">Username</label>
+              <input type="text" id="reg-username" name="username" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all" required />
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-slate-900 mb-2" for="reg-email">Email Address</label>
+              <input type="email" id="reg-email" name="email" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all" required />
+            </div>
+
+            <div class="relative">
+              <label class="block text-sm font-bold text-slate-900 mb-2" for="reg-password">Password</label>
+              <input type="password" id="reg-password" name="password" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all pr-12" placeholder="Min. 8 characters" required minlength="8" />
+              <button type="button" class="absolute right-3 top-[34px] text-slate-400 hover:text-slate-600 p-1" onclick="togglePassword('reg-password')"><i data-lucide="eye" class="w-5 h-5"></i></button>
+            </div>
+
+            <div class="relative">
+              <label class="block text-sm font-bold text-slate-900 mb-2" for="reg-confirm">Confirm Password</label>
+              <input type="password" id="reg-confirm" name="confirm_password" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all pr-12" required minlength="8" />
+              <button type="button" class="absolute right-3 top-[34px] text-slate-400 hover:text-slate-600 p-1" onclick="togglePassword('reg-confirm')"><i data-lucide="eye" class="w-5 h-5"></i></button>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 mt-2">Create Account</button>
+          </form>
+
+          <div class="text-center mt-8 text-slate-500 font-medium">
+            Already have an account? <button type="button" class="text-indigo-600 font-bold hover:text-indigo-800 transition-colors ml-1" onclick="switchForm('login')">Sign In</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    function switchForm(type) {
+      const login = document.getElementById('login-container')
+      const register = document.getElementById('register-container')
+    
+      if (type === 'register') {
+        login.classList.remove('active')
+        login.style.display = 'none'
+        register.classList.add('active')
+        register.style.display = 'block'
+      } else {
+        register.classList.remove('active')
+        register.style.display = 'none'
+        login.classList.add('active')
+        login.style.display = 'block'
+      }
+    }
+    
+    function togglePassword(inputId) {
+      const input = document.getElementById(inputId)
+      const icon = input.nextElementSibling.querySelector('i')
+      if (input.type === 'password') {
+        input.type = 'text'
+        icon.setAttribute('data-lucide', 'eye-off')
+      } else {
+        input.type = 'password'
+        icon.setAttribute('data-lucide', 'eye')
+      }
+      lucide.createIcons()
+    }
+    
+    function togglePhoneLogin() {
+      const emailForm = document.getElementById('login-email-form')
+      const phoneForm = document.getElementById('login-phone-form')
+      const optionsGrid = document.getElementById('login-options-grid')
+      const divider = document.getElementById('login-divider')
+    
+      if (emailForm.classList.contains('hidden')) {
+        emailForm.classList.remove('hidden')
+        phoneForm.classList.add('hidden')
+        if (optionsGrid) optionsGrid.classList.remove('hidden')
+        if (divider) divider.classList.remove('hidden')
+      } else {
+        emailForm.classList.add('hidden')
+        phoneForm.classList.remove('hidden')
+        if (optionsGrid) optionsGrid.classList.add('hidden')
+        if (divider) divider.classList.add('hidden')
+      }
+    }
+  </script>
+{% endblock %}

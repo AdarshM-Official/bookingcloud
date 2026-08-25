@@ -1,0 +1,245 @@
+/* Auth Layout */
+.auth-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--surface);
+}
+
+.auth-visual {
+  flex: 1;
+  background-color: var(--bg-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-visual-content {
+  max-width: 400px;
+  text-align: center;
+  z-index: 2;
+}
+
+.auth-visual-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 2rem;
+}
+
+.auth-mockup {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-light);
+  animation: float 6s ease-in-out infinite;
+  text-align: left;
+}
+
+.auth-mockup-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: var(--bg-color);
+}
+
+.auth-form-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.auth-header {
+  margin-bottom: 2.5rem;
+}
+
+.auth-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--secondary);
+}
+
+.auth-subtitle {
+  color: var(--text-muted);
+  font-size: 1.125rem;
+}
+
+/* Forms */
+.auth-form {
+  display: none;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.auth-form.active {
+  display: block;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+  position: relative;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--secondary);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: var(--transition);
+  background: var(--surface);
+  color: var(--text-main);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+/* Role Selection */
+.role-selection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.role-card {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.role-card:hover {
+  border-color: var(--primary);
+  background: var(--bg-color);
+}
+
+.role-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.role-card input[type="radio"]:checked + .role-content {
+  color: var(--primary);
+}
+
+.role-card:has(input[type="radio"]:checked) {
+  border-color: var(--primary);
+  background: rgba(79, 70, 229, 0.05);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.role-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.role-desc {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* Auth Actions */
+.auth-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.auth-link {
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.toggle-password:hover {
+  color: var(--secondary);
+}
+
+.messages {
+  background: #FEF2F2;
+  border-left: 4px solid #EF4444;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  color: #B91C1C;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 1024px) {
+  .auth-visual {
+    display: none;
+  }
+  .auth-form-container {
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  .role-selection {
+    grid-template-columns: 1fr;
+  }
+}

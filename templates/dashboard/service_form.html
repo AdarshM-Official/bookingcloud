@@ -1,0 +1,231 @@
+{% extends 'dashboard/base.html' %}
+
+{% block page_title %}
+  Add Service
+{% endblock %}
+{% block breadcrumbs %}
+  <span class="mx-2 text-slate-300">/</span>
+  <a href="{% url 'dashboard:services' %}" class="text-slate-500 hover:text-slate-700">Services</a>
+  <span class="mx-2 text-slate-300">/</span>
+  <span class="text-slate-500">Add</span>
+{% endblock %}
+
+{% block content %}
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Add New Service</h1>
+      <p class="text-slate-500 font-medium mt-1">Create a new service offering for your customers.</p>
+    </div>
+    <a href="{% url 'dashboard:services' %}" class="flex items-center gap-2 bg-white text-slate-700 font-bold px-4 py-2.5 rounded-lg border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Services</a>
+  </div>
+
+  {% if messages %}
+    <div class="mb-6 space-y-2">
+      {% for message in messages %}
+        <div class="p-4 rounded-lg {% if message.tags == 'error' %}
+            bg-red-50 border-red-200 text-red-800
+          {% else %}
+            bg-emerald-50 border-emerald-200 text-emerald-800
+          {% endif %} border font-medium text-sm flex items-center gap-2">
+          <i data-lucide="{% if message.tags == 'error' %}
+              alert-circle
+            {% else %}
+              check-circle
+            {% endif %}"
+            class="w-5 h-5 {% if message.tags == 'error' %}
+              text-red-500
+            {% else %}
+              text-emerald-500
+            {% endif %}">
+
+          </i>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+    <!-- Left Column: Suggestions (Only if available) -->
+    <div class="xl:col-span-7 flex flex-col gap-6">
+      {% if suggestions %}
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 class="font-extrabold text-slate-900 text-lg">Suggested for your business</h3>
+              <p class="text-xs text-slate-500 font-medium mt-1">
+                Based on category: <span class="text-brand-600 font-bold uppercase tracking-wider">{{ business.category }}</span>
+              </p>
+            </div>
+            <!-- Suggestion Search -->
+            <div class="relative w-full sm:w-48">
+              <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <input type="text" id="suggestion-search" placeholder="Search..." class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-brand-500 transition-colors" />
+            </div>
+          </div>
+
+          <div class="p-5">
+            <div id="suggestions-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {% for item in suggestions %}
+                <button type="button" class="suggestion-btn text-left flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-brand-400 hover:bg-brand-50 hover:shadow-sm transition-all group" data-name="{{ item.name }}" data-duration="{{ item.duration }}" data-description="{{ item.description }}">
+                  <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-white group-hover:text-brand-600 transition-colors">
+                    <i data-lucide="{{ item.icon|default:'zap' }}" class="w-5 h-5 text-slate-400 group-hover:text-brand-600 transition-colors"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="font-bold text-slate-900 truncate group-hover:text-brand-700">{{ item.name }}</div>
+                    <div class="text-xs text-slate-500 font-medium">Approx. {{ item.duration }} min</div>
+                  </div>
+                  <i data-lucide="arrow-right" class="w-4 h-4 text-brand-600 opacity-0 group-hover:opacity-100 transition-opacity self-center"></i>
+                </button>
+              {% endfor %}
+            </div>
+
+            <div id="no-suggestions-msg" class="hidden text-center py-8">
+              <p class="text-sm font-medium text-slate-500">No suggestions match your search.</p>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-8 text-center flex flex-col items-center justify-center">
+          <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+            <i data-lucide="layers" class="w-8 h-8 text-indigo-400"></i>
+          </div>
+          <h3 class="font-extrabold text-indigo-900 text-lg mb-2">Create your services</h3>
+          <p class="text-sm font-medium text-indigo-700 max-w-sm">Add the services customers can book from your business. Fill out the form manually to get started.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Right Column: The Form -->
+    <div class="xl:col-span-5">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden sticky top-6">
+        <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <h3 class="font-extrabold text-slate-900 text-lg">Service Details</h3>
+          <button type="button" id="clear-form-btn" class="text-xs font-bold text-slate-500 hover:text-slate-800 hidden">Clear</button>
+        </div>
+
+        <form action="{% url 'dashboard:service_add' %}" method="POST" class="p-6">
+          {% csrf_token %}
+
+          <div id="feedback-msg" class="hidden mb-4 p-3 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-800 text-xs font-bold flex items-center gap-2">
+            <i data-lucide="check-circle" class="w-4 h-4 text-indigo-600"></i>
+            <span>Suggestion loaded — customize details below.</span>
+          </div>
+
+          <div class="space-y-5">
+            <div>
+              <label for="service_name" class="block text-sm font-bold text-slate-700 mb-1.5">Service Name <span class="text-red-500">*</span></label>
+              <input type="text" id="service_name" name="service_name" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" placeholder="e.g. Men's Haircut" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label for="duration" class="block text-sm font-bold text-slate-700 mb-1.5">Duration (min) <span class="text-red-500">*</span></label>
+                <input type="number" id="duration" name="duration" required min="1" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" placeholder="30" />
+              </div>
+              <div>
+                <label for="price" class="block text-sm font-bold text-slate-700 mb-1.5">Price (₹) <span class="text-red-500">*</span></label>
+                <input type="number" step="0.01" id="price" name="price" required min="0" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" placeholder="500.00" />
+              </div>
+            </div>
+
+            <div>
+              <label for="description" class="block text-sm font-bold text-slate-700 mb-1.5">Description (Optional)</label>
+              <textarea id="description" name="description" rows="3" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all resize-none" placeholder="Describe what the service includes..."></textarea>
+            </div>
+
+            <!-- Hidden toggle for Active/Inactive as requested in spec -->
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" checked class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500 border-slate-300" />
+              <span class="text-sm font-bold text-slate-700">Service is active and bookable</span>
+            </label>
+          </div>
+
+          <div class="mt-8">
+            <button type="submit" class="w-full flex items-center justify-center gap-2 bg-brand-600 text-white font-bold px-4 py-3 rounded-xl shadow-sm shadow-brand-200 hover:bg-brand-700 transition-colors"><i data-lucide="save" class="w-4 h-4"></i> Save Service</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Suggestion Search Logic
+      const searchInput = document.getElementById('suggestion-search')
+      const suggestionBtns = document.querySelectorAll('.suggestion-btn')
+      const noSuggestionsMsg = document.getElementById('no-suggestions-msg')
+    
+      if (searchInput) {
+        searchInput.addEventListener('input', function (e) {
+          const term = e.target.value.toLowerCase()
+          let hasVisible = false
+    
+          suggestionBtns.forEach((btn) => {
+            const name = btn.dataset.name.toLowerCase()
+            if (name.includes(term)) {
+              btn.style.display = 'flex'
+              hasVisible = true
+            } else {
+              btn.style.display = 'none'
+            }
+          })
+    
+          if (!hasVisible && suggestionBtns.length > 0) {
+            noSuggestionsMsg.classList.remove('hidden')
+          } else {
+            noSuggestionsMsg.classList.add('hidden')
+          }
+        })
+      }
+    
+      // Prefill Form Logic
+      const formName = document.getElementById('service_name')
+      const formDuration = document.getElementById('duration')
+      const formDesc = document.getElementById('description')
+      const formPrice = document.getElementById('price')
+      const feedbackMsg = document.getElementById('feedback-msg')
+      const clearBtn = document.getElementById('clear-form-btn')
+    
+      suggestionBtns.forEach((btn) => {
+        btn.addEventListener('click', function () {
+          const name = this.dataset.name
+          const duration = this.dataset.duration
+          const desc = this.dataset.description
+    
+          // Fill form
+          formName.value = name
+          formDuration.value = duration
+          if (desc && desc !== 'None') {
+            formDesc.value = desc
+          } else {
+            formDesc.value = ''
+          }
+    
+          // Focus price to encourage them to fill it
+          formPrice.focus()
+    
+          // Show feedback
+          feedbackMsg.classList.remove('hidden')
+          clearBtn.classList.remove('hidden')
+    
+          // Optionally scroll to form on mobile
+          if (window.innerWidth < 1280) {
+            formName.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        })
+      })
+    
+      if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+          formName.value = ''
+          formDuration.value = ''
+          formDesc.value = ''
+          formPrice.value = ''
+          feedbackMsg.classList.add('hidden')
+          clearBtn.classList.add('hidden')
+        })
+      }
+    })
+  </script>
+{% endblock %}

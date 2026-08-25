@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Book {{ service.service_name }} | BookingSaaS
+{% endblock %}
+
+{% block content %}
+  <div class="min-h-screen bg-slate-50 pt-24 pb-12">
+    <div class="max-w-xl mx-auto px-4 sm:px-6">
+      <a href="{% url 'website:business_profile' business.id %}" class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-800 mb-6 transition-colors"><i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Back to Profile</a>
+
+      {% if messages %}
+        <div class="mb-6 space-y-2">
+          {% for message in messages %}
+            <div class="p-4 rounded-lg {% if message.tags == 'error' %}
+                bg-red-50 border-red-200 text-red-800
+              {% elif message.tags == 'info' %}
+                bg-blue-50 border-blue-200 text-blue-800
+              {% else %}
+                bg-emerald-50 border-emerald-200 text-emerald-800
+              {% endif %} border font-medium text-sm flex items-center gap-2">
+              <i data-lucide="{% if message.tags == 'error' %}
+                  alert-circle
+                {% else %}
+                  info
+                {% endif %}"
+                class="w-5 h-5">
+
+              </i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <!-- Header -->
+        <div class="p-6 border-b border-slate-100 bg-indigo-50/50 flex flex-col items-center text-center">
+          {% if business.profile_image %}
+            <img src="{{ business.profile_image.url }}" alt="{{ business.business_name }}" class="w-16 h-16 rounded-full border-4 border-white shadow-sm object-cover mb-4" />
+          {% else %}
+            <div class="w-16 h-16 rounded-full border-4 border-white shadow-sm bg-indigo-100 flex items-center justify-center text-indigo-400 mb-4">
+              <i data-lucide="store" class="w-8 h-8"></i>
+            </div>
+          {% endif %}
+          <h1 class="text-2xl font-extrabold text-slate-900 mb-1">Book Appointment</h1>
+          <p class="text-slate-600 font-medium">{{ business.business_name }} &bull; {{ service.service_name }}</p>
+        </div>
+
+        <!-- Service Summary -->
+        <div class="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+          <div>
+            <h3 class="font-bold text-slate-900">{{ service.service_name }}</h3>
+            <p class="text-sm text-slate-500 mt-0.5">{{ service.duration }} mins</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm text-slate-500 font-medium">Price</p>
+            <p class="text-lg font-extrabold text-indigo-600">₹{{ service.price }}</p>
+          </div>
+        </div>
+
+        <!-- Booking Form -->
+        <form method="POST" action="" class="p-6">
+          {% csrf_token %}
+
+          <div class="space-y-5">
+            <div>
+              <label for="date" class="block text-sm font-bold text-slate-700 mb-1.5">Select Date <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <i data-lucide="calendar" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="date" id="date" name="date" required value="{{ selected_date }}" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all cursor-pointer" />
+              </div>
+            </div>
+
+            <div id="time-container" class="{% if not selected_date and not suggested_time %}opacity-50 pointer-events-none{% endif %} transition-opacity">
+              <label for="time" class="block text-sm font-bold text-slate-700 mb-1.5">Select Time <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <i data-lucide="clock" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <select id="time" name="time" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all cursor-pointer appearance-none">
+                  <option value="">-- Choose a date first --</option>
+                  {% if suggested_time %}
+                    <option value="{{ suggested_time }}" selected>{{ suggested_time }} (Suggested)</option>
+                  {% endif %}
+                </select>
+                <i data-lucide="chevron-down" class="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+              </div>
+              <p id="time-help" class="text-xs text-slate-500 mt-1.5 font-medium">Please pick a date to see available time slots.</p>
+            </div>
+
+            <div>
+              <label for="notes" class="block text-sm font-bold text-slate-700 mb-1.5">Additional Notes (Optional)</label>
+              <textarea id="notes" name="notes" rows="3" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all resize-none" placeholder="Any special requests?"></textarea>
+            </div>
+          </div>
+
+          <div class="mt-8">
+            <button type="submit" id="submit-btn" class="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold px-4 py-3.5 rounded-xl shadow-sm shadow-indigo-200 hover:bg-indigo-700 transition-colors text-lg disabled:opacity-50">Confirm Booking</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const dateInput = document.getElementById('date');
+    const timeSelect = document.getElementById('time');
+    const timeContainer = document.getElementById('time-container');
+    const timeHelp = document.getElementById('time-help');
+    
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+    
+    const fetchSlots = async (date) => {
+      timeHelp.textContent = "Loading available slots...";
+      timeHelp.classList.add('text-indigo-500');
+      
+      try {
+        const response = await fetch('/api/slots/{{ service.id }}/?date=' + date);
+        const data = await response.json();
+        
+        timeSelect.innerHTML = '';
+        
+        if (data.slots && data.slots.length > 0) {
+          timeContainer.classList.remove('opacity-50', 'pointer-events-none');
+          
+          const defaultOpt = document.createElement('option');
+          defaultOpt.value = "";
+          defaultOpt.textContent = "-- Select a time slot --";
+          timeSelect.appendChild(defaultOpt);
+          
+          data.slots.forEach(slot => {
+            const opt = document.createElement('option');
+            opt.value = slot;
+            
+            // Format to 12-hour AM/PM for display
+            let [hours, minutes] = slot.split(':');
+            hours = parseInt(hours);
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const formattedTime = hours + ':' + minutes + ' ' + ampm;
+            
+            opt.textContent = formattedTime;
+            timeSelect.appendChild(opt);
+          });
+          
+          timeHelp.textContent = data.slots.length + " slots available.";
+          timeHelp.classList.remove('text-indigo-500', 'text-red-500');
+          timeHelp.classList.add('text-emerald-600');
+        } else {
+          const opt = document.createElement('option');
+          opt.value = "";
+          opt.textContent = "-- Fully Booked --";
+          timeSelect.appendChild(opt);
+          
+          timeHelp.textContent = "No available slots on this date.";
+          timeHelp.classList.remove('text-indigo-500', 'text-emerald-600');
+          timeHelp.classList.add('text-red-500');
+        }
+      } catch (err) {
+        timeHelp.textContent = "Error loading slots. Please try again.";
+        timeHelp.classList.add('text-red-500');
+      }
+    };
+    
+    dateInput.addEventListener('change', (e) => {
+      if(e.target.value) {
+        fetchSlots(e.target.value);
+      } else {
+        timeContainer.classList.add('opacity-50', 'pointer-events-none');
+        timeSelect.innerHTML = '<option value="">-- Choose a date first --</option>';
+        timeHelp.textContent = "Please pick a date to see available time slots.";
+      }
+    });
+    
+    // If date is already pre-filled (like on an error return), load slots, but keep the suggested time if available
+    {% if selected_date and not suggested_time %}
+      fetchSlots("{{ selected_date }}");
+    {% endif %}
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends 'dashboard/base.html' %}
+
+{% block page_title %}
+  Calendar
+{% endblock %}
+{% block breadcrumbs %}
+  <span class="mx-2 text-slate-300">/</span>
+  <span class="text-slate-500">Calendar</span>
+{% endblock %}
+
+{% block content %}
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Calendar</h1>
+      <p class="text-slate-500 font-medium mt-1">View and manage your upcoming schedule.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'dashboard:bookings' %}" class="flex items-center justify-center gap-2 bg-white text-slate-700 font-bold px-4 py-2.5 rounded-lg border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-brand-600 transition-colors"><i data-lucide="list" class="w-4 h-4"></i> List View</a>
+      <button class="flex items-center justify-center gap-2 bg-brand-600 text-white font-bold px-4 py-2.5 rounded-lg shadow-sm shadow-brand-200 hover:bg-brand-700 transition-colors"><i data-lucide="plus" class="w-4 h-4"></i> Add Booking</button>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden p-6">
+    <div id="calendar" class="w-full"></div>
+  </div>
+
+  <!-- FullCalendar Setup -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+  <style>
+    /* Tailwind-style overrides for FullCalendar */
+    .fc-theme-standard .fc-scrollgrid {
+      border-color: #e2e8f0;
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    .fc-theme-standard th {
+      border-color: #e2e8f0;
+      padding: 12px 0;
+      background-color: #f8fafc;
+      font-weight: 700;
+      color: #64748b;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+    }
+    .fc-theme-standard td {
+      border-color: #e2e8f0;
+    }
+    .fc .fc-toolbar-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .fc .fc-button-primary {
+      background-color: #4f46e5 !important;
+      border-color: #4f46e5 !important;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      text-transform: capitalize;
+      padding: 0.5rem 1rem;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+    .fc .fc-button-primary:hover {
+      background-color: #4338ca !important;
+      border-color: #4338ca !important;
+    }
+    .fc .fc-button-primary:disabled {
+      background-color: #a5b4fc !important;
+      border-color: #a5b4fc !important;
+    }
+    .fc .fc-button-active {
+      background-color: #312e81 !important;
+      border-color: #312e81 !important;
+    }
+    .fc .fc-today-button {
+      background-color: #f8fafc !important;
+      color: #475569 !important;
+      border-color: #cbd5e1 !important;
+    }
+    .fc .fc-today-button:hover {
+      background-color: #f1f5f9 !important;
+    }
+    .fc-day-today {
+      background-color: #f0fdf4 !important;
+    }
+    .fc-event {
+      border: none !important;
+      border-radius: 4px;
+      padding: 2px 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .fc-event.status-pending {
+      background-color: #f59e0b;
+      color: white;
+    }
+    .fc-event.status-confirmed {
+      background-color: #4f46e5;
+      color: white;
+    }
+    .fc-event.status-completed {
+      background-color: #10b981;
+      color: white;
+    }
+    .fc-event.status-cancelled {
+      background-color: #ef4444;
+      color: white;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const calendarEl = document.getElementById('calendar')
+    
+      // We pass the JSON string safely into JavaScript
+      const eventsData = JSON.parse('{{ events_json|escapejs }}')
+    
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        slotMinTime: '06:00:00',
+        slotMaxTime: '22:00:00',
+        allDaySlot: false,
+        events: eventsData,
+        eventClick: function (info) {
+          info.jsEvent.preventDefault() // don't let the browser navigate
+          if (info.event.url) {
+            // Optional: Handle click event natively or let browser go
+            alert('Booking Details:\n\n' + info.event.title + '\nStart: ' + info.event.start.toLocaleString())
+          }
+        }
+      })
+    
+      calendar.render()
+    })
+  </script>
+{% endblock %}

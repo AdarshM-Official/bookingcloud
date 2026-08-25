@@ -1,0 +1,24 @@
+﻿{% extends 'dashboard/base.html' %}
+
+{% block page_title %}Availability{% endblock %}
+{% block breadcrumbs %}
+  <span class="mx-2 text-slate-300">/</span>
+  <span class="text-slate-500">Availability</span>
+{% endblock %}
+
+{% block content %}
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Availability</h1>
+      <p class="text-slate-500 font-medium mt-1">Set your working hours and days off.</p>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col items-center justify-center text-center py-24 px-4">
+    <div class="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center mb-6">
+      <i data-lucide="clock" class="w-10 h-10 text-brand-600"></i>
+    </div>
+    <h2 class="text-2xl font-bold text-slate-900 mb-2">Availability is coming soon</h2>
+    <p class="text-slate-500 font-medium max-w-md">We are currently working on this feature. It will be available in a future update.</p>
+  </div>
+{% endblock %}
