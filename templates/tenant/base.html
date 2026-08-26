@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- SEO & Meta -->
+    <title>Book {{ tenant.business_name }} Online | BookingCloud</title>
+    <meta name="description" content="{{ tenant.description|default:'Book your next appointment online.'|truncatechars:160 }}">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{{ tenant.business_name }} - Book Online">
+    <meta property="og:description" content="{{ tenant.description|default:'Book your next appointment online.'|truncatechars:160 }}">
+    {% if tenant.profile_image %}
+    <meta property="og:image" content="{{ tenant.profile_image.url }}">
+    {% endif %}
+    <meta property="og:type" content="website">
+
+    <!-- Styles & Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Custom Branding -->
+    <style>
+        :root {
+            --brand-primary: {{ tenant.primary_color|default:'#111827' }};
+            --brand-secondary: {{ tenant.secondary_color|default:'#f3f4f6' }};
+        }
+        
+        .text-tenant { color: var(--brand-primary); }
+        .bg-tenant { background-color: var(--brand-primary); }
+        .bg-tenant-light { background-color: var(--brand-secondary); }
+        .border-tenant { border-color: var(--brand-primary); }
+        
+        .hover\:bg-tenant:hover { background-color: var(--brand-primary); }
+        .hover\:text-tenant:hover { color: var(--brand-primary); }
+        .hover\:border-tenant:hover { border-color: var(--brand-primary); }
+        
+        .ring-tenant:focus { --tw-ring-color: var(--brand-primary); }
+        
+        /* Subtle patterns */
+        .bg-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='0.03' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Cg/%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans antialiased text-slate-800 flex flex-col min-h-screen">
+    
+    <!-- Sticky Navbar -->
+    <nav class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 sm:h-20">
+                <!-- Brand -->
+                <div class="flex items-center gap-3">
+                    {% if tenant.profile_image %}
+                        <img src="{{ tenant.profile_image.url }}" alt="{{ tenant.business_name }}" class="h-10 w-10 sm:h-12 sm:w-12 rounded-xl object-cover shadow-sm border border-slate-100">
+                    {% else %}
+                        <div class="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-tenant text-white flex items-center justify-center font-black text-lg shadow-sm">
+                            {{ tenant.business_name|first|upper }}
+                        </div>
+                    {% endif %}
+                    <a href="{% url 'tenant_home' %}" class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight hover:opacity-80 transition-opacity">{{ tenant.business_name }}</a>
+                </div>
+                
+                <!-- Desktop Links -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="{% url 'tenant_home' %}" class="text-sm font-bold text-slate-600 hover:text-tenant transition-colors">Home</a>
+                    <a href="#services" class="text-sm font-bold text-slate-600 hover:text-tenant transition-colors">Services</a>
+                    <a href="#team" class="text-sm font-bold text-slate-600 hover:text-tenant transition-colors">Team</a>
+                    <a href="#about" class="text-sm font-bold text-slate-600 hover:text-tenant transition-colors">About</a>
+                </div>
+                
+                <!-- Desktop CTA -->
+                <div class="hidden md:flex items-center gap-4">
+                    <a href="#book-now" class="px-6 py-2.5 text-sm font-bold bg-tenant text-white rounded-xl shadow-[0_4px_14px_0_rgba(0,0,0,0.1)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] transition-all">Book Now</a>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="p-2 text-slate-600 hover:text-tenant rounded-lg focus:outline-none focus:ring-2 ring-tenant bg-slate-50">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 shadow-xl absolute w-full">
+            <div class="px-4 pt-2 pb-6 space-y-1">
+                <a href="{% url 'tenant_home' %}" class="block px-3 py-3 rounded-lg text-base font-bold text-slate-900 hover:bg-slate-50">Home</a>
+                <a href="#services" class="block px-3 py-3 rounded-lg text-base font-bold text-slate-900 hover:bg-slate-50">Services</a>
+                <a href="#team" class="block px-3 py-3 rounded-lg text-base font-bold text-slate-900 hover:bg-slate-50">Team</a>
+                <a href="#about" class="block px-3 py-3 rounded-lg text-base font-bold text-slate-900 hover:bg-slate-50">About & Hours</a>
+                
+                <div class="mt-4 pt-4 border-t border-slate-100">
+                    <a href="#book-now" class="flex justify-center w-full px-4 py-3 text-base font-bold bg-tenant text-white rounded-xl shadow-sm">Book Appointment</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white mt-auto pb-24 md:pb-12 border-t-4 border-tenant">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+                
+                <!-- Brand Info -->
+                <div class="md:col-span-1">
+                    <h3 class="text-2xl font-black tracking-tight mb-4 text-white">{{ tenant.business_name }}</h3>
+                    {% if tenant.category %}
+                    <p class="text-sm font-bold text-tenant mb-4 uppercase tracking-wider">{{ tenant.category }}</p>
+                    {% endif %}
+                    <p class="text-slate-400 text-sm font-medium leading-relaxed">{{ tenant.description|truncatewords:20|default:"Experience premium services and effortless booking." }}</p>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-6">Explore</h4>
+                    <ul class="space-y-4 text-sm font-medium text-slate-400">
+                        <li><a href="{% url 'tenant_home' %}" class="hover:text-tenant transition-colors">Home</a></li>
+                        <li><a href="#services" class="hover:text-tenant transition-colors">All Services</a></li>
+                        <li><a href="#team" class="hover:text-tenant transition-colors">Our Team</a></li>
+                        <li><a href="#about" class="hover:text-tenant transition-colors">About Us</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact Info -->
+                <div>
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-6">Contact</h4>
+                    <ul class="space-y-4 text-sm font-medium text-slate-400">
+                        {% if tenant.phone %}
+                        <li class="flex items-start gap-3"><i data-lucide="phone" class="w-4 h-4 mt-0.5 text-tenant"></i> {{ tenant.phone }}</li>
+                        {% endif %}
+                        {% if tenant.email %}
+                        <li class="flex items-start gap-3"><i data-lucide="mail" class="w-4 h-4 mt-0.5 text-tenant"></i> {{ tenant.email }}</li>
+                        {% endif %}
+                        {% if tenant.address %}
+                        <li class="flex items-start gap-3"><i data-lucide="map-pin" class="w-4 h-4 mt-0.5 text-tenant"></i> {{ tenant.address }}{% if tenant.city %}, {{ tenant.city }}{% endif %}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                
+                <!-- Social & Action -->
+                <div>
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-6">Connect</h4>
+                    <div class="flex items-center space-x-4 mb-8">
+                        {% if tenant.facebook_url %}
+                        <a href="{{ tenant.facebook_url }}" target="_blank" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-tenant transition-all">
+                            <i data-lucide="facebook" class="w-5 h-5"></i>
+                        </a>
+                        {% endif %}
+                        {% if tenant.instagram_url %}
+                        <a href="{{ tenant.instagram_url }}" target="_blank" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-tenant transition-all">
+                            <i data-lucide="instagram" class="w-5 h-5"></i>
+                        </a>
+                        {% endif %}
+                        {% if tenant.website_url %}
+                        <a href="{{ tenant.website_url }}" target="_blank" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-tenant transition-all">
+                            <i data-lucide="globe" class="w-5 h-5"></i>
+                        </a>
+                        {% endif %}
+                        {% if tenant.phone %}
+                        <a href="https://wa.me/{{ tenant.phone|cut:' ' }}" target="_blank" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-tenant transition-all" title="WhatsApp">
+                            <i data-lucide="message-circle" class="w-5 h-5"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                    <a href="#book-now" class="w-full block text-center px-6 py-3 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-100 transition-colors">Book Online</a>
+                </div>
+            </div>
+            
+            <div class="mt-16 border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                <span class="text-xs text-slate-500 font-medium">&copy; {% now 'Y' %} {{ tenant.business_name }}. All rights reserved.</span>
+                
+                <a href="http://{{ request.get_host }}" class="text-xs font-bold text-slate-500 flex items-center gap-2 hover:text-white transition-colors group">
+                    Powered by <span class="text-white tracking-tight group-hover:text-tenant transition-colors">BookingCloud</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Sticky Action Bar -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-lg border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-50 flex items-center gap-3">
+        {% if tenant.phone %}
+        <a href="tel:{{ tenant.phone }}" class="flex-1 px-4 py-3.5 bg-slate-100 text-slate-900 font-bold text-sm text-center rounded-xl border border-slate-200 flex justify-center items-center gap-2 active:bg-slate-200">
+            <i data-lucide="phone-call" class="w-4 h-4"></i> Call
+        </a>
+        {% endif %}
+        <a href="#book-now" class="flex-[2] px-4 py-3.5 bg-tenant text-white font-bold text-sm text-center rounded-xl shadow-lg active:scale-[0.98] transition-transform">
+            Book Now
+        </a>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        lucide.createIcons();
+        
+        // Mobile Menu Toggle
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if (mobileBtn && mobileMenu) {
+            mobileBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    </script>
+</body>
+</html>

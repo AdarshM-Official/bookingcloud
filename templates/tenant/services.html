@@ -1,0 +1,113 @@
+﻿{% extends 'tenant/base.html' %}
+
+{% block page_title %}Our Services | {{ tenant.business_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 mb-24">
+    <div class="mb-12">
+        <h1 class="text-3xl font-black text-slate-900 mb-2">Our Services</h1>
+        <p class="text-slate-500 font-medium">Browse our full range of services and book your next appointment.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="servicesGrid">
+        {% for service in services %}
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 hover:border-tenant hover:shadow-xl hover:shadow-tenant/10 transition-all flex flex-col justify-between h-full relative group">
+            
+            <!-- Checkbox for multi-select -->
+            <label class="absolute top-4 right-4 cursor-pointer">
+                <input type="checkbox" name="selected_services" value="{{ service.id }}" data-price="{{ service.price }}" data-duration="{{ service.duration }}" class="service-checkbox peer sr-only">
+                <div class="w-6 h-6 rounded border-2 border-slate-300 peer-checked:bg-tenant peer-checked:border-tenant flex items-center justify-center transition-colors">
+                    <i data-lucide="check" class="w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity"></i>
+                </div>
+            </label>
+
+            <div class="pr-8">
+                <div class="flex justify-between items-start mb-3">
+                    <h3 class="text-xl font-bold text-slate-900 pr-4">{{ service.service_name }}</h3>
+                </div>
+                <span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap mb-4 inline-block">{{ service.duration }} min</span>
+                <p class="text-sm text-slate-500 font-medium leading-relaxed mb-6">{{ service.description|default:"Experience this premium service tailored just for you." }}</p>
+            </div>
+            
+            <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Price</p>
+                    <p class="text-lg font-black text-tenant">₹{{ service.price }}</p>
+                </div>
+                <a href="{% url 'tenant_book_service' service.id %}" class="px-5 py-2.5 bg-slate-900 hover:bg-tenant text-white font-bold rounded-xl shadow-sm transition-colors text-sm">
+                    Book Now
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-16 bg-slate-50 rounded-2xl border border-slate-200 border-dashed">
+            <i data-lucide="sparkles" class="w-12 h-12 text-slate-300 mx-auto mb-4"></i>
+            <p class="text-slate-500 font-medium">Services are currently being updated.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Floating Multi-Booking Action Bar -->
+<div id="multiBookBar" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-200 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-50 transform translate-y-full transition-transform duration-300 flex justify-center">
+    <div class="max-w-6xl w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+            <p class="text-sm font-bold text-slate-500 uppercase tracking-widest"><span id="selectedCount">0</span> Services Selected</p>
+            <p class="text-xl font-black text-slate-900">Total: ₹<span id="selectedTotal">0</span> <span class="text-sm text-slate-500 font-medium">· <span id="selectedDuration">0</span> mins</span></p>
+        </div>
+        <button id="bookMultiBtn" class="w-full sm:w-auto px-8 py-4 bg-tenant text-white font-black rounded-xl shadow-lg hover:opacity-90 transition-opacity">
+            Continue to Book
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const checkboxes = document.querySelectorAll('.service-checkbox');
+        const multiBookBar = document.getElementById('multiBookBar');
+        const countEl = document.getElementById('selectedCount');
+        const totalEl = document.getElementById('selectedTotal');
+        const durationEl = document.getElementById('selectedDuration');
+        const bookBtn = document.getElementById('bookMultiBtn');
+        
+        function updateCart() {
+            let count = 0;
+            let total = 0;
+            let duration = 0;
+            let selectedIds = [];
+            
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    count++;
+                    total += parseFloat(cb.dataset.price);
+                    duration += parseInt(cb.dataset.duration);
+                    selectedIds.push(cb.value);
+                }
+            });
+            
+            countEl.textContent = count;
+            totalEl.textContent = total;
+            durationEl.textContent = duration;
+            
+            if (count > 0) {
+                multiBookBar.classList.remove('translate-y-full');
+            } else {
+                multiBookBar.classList.add('translate-y-full');
+            }
+            
+            return selectedIds;
+        }
+        
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateCart);
+        });
+        
+        bookBtn.addEventListener('click', () => {
+            const ids = updateCart();
+            if(ids.length > 0) {
+                window.location.href = "{% url 'tenant_book_multi_service' %}?services=" + ids.join(',');
+            }
+        });
+    });
+</script>
+{% endblock %}

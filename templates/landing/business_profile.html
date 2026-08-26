@@ -3,119 +3,162 @@
 {% block title %}{{ business.business_name }} | BookingSaaS{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-slate-50 pt-24 pb-12">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6">
-    <a href="{% url 'website:discover' %}" class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-800 mb-6 transition-colors">
-      <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Back to Discover
-    </a>
-    
-    <!-- Hero / Header -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
-      <div class="h-64 sm:h-80 relative overflow-hidden bg-slate-100 flex">
-        {% if business.gallery_images.all %}
-          {% with first_img=business.gallery_images.all|first %}
-            <div class="w-full h-full relative">
-               <img src="{{ first_img.image.url }}" alt="{{ business.business_name }}" class="w-full h-full object-cover">
-               <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-            </div>
-          {% endwith %}
-        {% elif business.profile_image %}
-          <div class="w-full h-full relative">
-            <img src="{{ business.profile_image.url }}" alt="{{ business.business_name }}" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-          </div>
-        {% else %}
-          <div class="absolute inset-0 opacity-50" style="background-image: repeating-linear-gradient(45deg, #e2e8f0 25%, transparent 25%, transparent 75%, #e2e8f0 75%, #e2e8f0), repeating-linear-gradient(45deg, #e2e8f0 25%, #f8fafc 25%, #f8fafc 75%, #e2e8f0 75%, #e2e8f0); background-position: 0 0, 10px 10px; background-size: 20px 20px;"></div>
-          <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-        {% endif %}
+<div class="min-h-screen bg-slate-50 pt-24 pb-20">
+  <!-- Top Banner (Behind everything) -->
+  <div class="absolute top-0 left-0 w-full h-80 bg-indigo-900 overflow-hidden z-0">
+    {% if business.gallery_images.all %}
+      {% with first_img=business.gallery_images.all|first %}
+        <img src="{{ first_img.image.url }}" class="w-full h-full object-cover opacity-40 mix-blend-overlay">
+      {% endwith %}
+    {% elif business.profile_image %}
+      <img src="{{ business.profile_image.url }}" class="w-full h-full object-cover opacity-40 mix-blend-overlay">
+    {% else %}
+      <div class="absolute inset-0 bg-gradient-to-br from-indigo-900 to-slate-900"></div>
+    {% endif %}
+  </div>
 
-        <div class="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-          <div class="flex items-center gap-4">
-            {% if business.profile_image %}
-              <img src="{{ business.profile_image.url }}" alt="Logo" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-4 border-white shadow-lg object-cover bg-white">
-            {% endif %}
-            <div>
-              <div class="inline-block px-2 py-0.5 rounded text-xs font-bold bg-indigo-600 text-white uppercase tracking-wider mb-2">{{ business.category }}</div>
-              <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-none mb-1">{{ business.business_name }}</h1>
-              <p class="text-slate-200 font-medium flex items-center gap-1.5 text-sm sm:text-base mt-2">
-                <i data-lucide="map-pin" class="w-4 h-4"></i> {{ business.city|default:"Location not specified" }}
-              </p>
-            </div>
-          </div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+    <!-- Back navigation -->
+    <a href="{% url 'website:discover' %}" class="inline-flex items-center text-sm font-bold text-white/80 hover:text-white mb-8 transition-colors backdrop-blur-sm bg-black/20 px-3 py-1.5 rounded-lg">
+      <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Back to Discover
+    </a>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <!-- LEFT SIDEBAR: Business Identity & Info (Sticky) -->
+      <div class="lg:col-span-4 space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden lg:sticky lg:top-28">
+           <!-- Profile Header -->
+           <div class="p-8 text-center border-b border-slate-100">
+             <div class="relative inline-block mb-5">
+               {% if business.profile_image %}
+                 <img src="{{ business.profile_image.url }}" alt="{{ business.business_name }}" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg mx-auto bg-slate-50">
+               {% else %}
+                 <div class="w-32 h-32 rounded-full border-4 border-white shadow-lg mx-auto bg-indigo-50 flex items-center justify-center text-indigo-400">
+                   <i data-lucide="store" class="w-12 h-12"></i>
+                 </div>
+               {% endif %}
+               <div class="absolute bottom-1 right-1 w-6 h-6 bg-emerald-500 border-2 border-white rounded-full" title="Active"></div>
+             </div>
+             
+             <div class="inline-block px-2.5 py-1 rounded-md text-xs font-extrabold bg-indigo-50 text-indigo-600 uppercase tracking-wider mb-3">{{ business.category|default:"Services" }}</div>
+             <h1 class="text-2xl font-extrabold text-slate-900 mb-1">{{ business.business_name }}</h1>
+             <p class="text-slate-500 font-medium text-sm flex items-center justify-center gap-1.5">
+               <i data-lucide="map-pin" class="w-4 h-4 text-slate-400"></i> {{ business.city|default:"Location not specified" }}
+             </p>
+           </div>
+
+           <!-- Contact & Details -->
+           <div class="p-8 bg-slate-50/50 space-y-5">
+             {% if business.phone %}
+             <div class="flex items-start gap-4">
+               <div class="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 shrink-0 shadow-sm"><i data-lucide="phone" class="w-4 h-4"></i></div>
+               <div>
+                 <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Phone</p>
+                 <p class="text-sm font-bold text-slate-700">{{ business.phone }}</p>
+               </div>
+             </div>
+             {% endif %}
+             {% if business.email %}
+             <div class="flex items-start gap-4">
+               <div class="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 shrink-0 shadow-sm"><i data-lucide="mail" class="w-4 h-4"></i></div>
+               <div>
+                 <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Email</p>
+                 <p class="text-sm font-bold text-slate-700">{{ business.email }}</p>
+               </div>
+             </div>
+             {% endif %}
+             {% if business.address %}
+             <div class="flex items-start gap-4">
+               <div class="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 shrink-0 shadow-sm"><i data-lucide="map" class="w-4 h-4"></i></div>
+               <div>
+                 <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Address</p>
+                 <p class="text-sm font-bold text-slate-700">{{ business.address }}</p>
+               </div>
+             </div>
+             {% endif %}
+             
+             <div class="pt-5 border-t border-slate-200">
+               <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Operating Hours</p>
+               <div class="flex justify-between items-center text-sm font-bold text-slate-700 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                 <div class="flex items-center gap-2 text-indigo-600"><i data-lucide="clock" class="w-4 h-4"></i> {{ business.working_days }} Days/Week</div>
+                 <div>{{ business.opening_time|time:"g:i A" }} - {{ business.closing_time|time:"g:i A" }}</div>
+               </div>
+             </div>
+           </div>
         </div>
       </div>
 
-      <!-- Quick Info Bar -->
-      <div class="bg-white px-6 py-4 border-b border-slate-100 flex flex-wrap gap-x-8 gap-y-4 text-sm font-medium text-slate-700">
-        {% if business.phone %}
-          <div class="flex items-center gap-2">
-            <i data-lucide="phone" class="w-4 h-4 text-slate-400"></i> {{ business.phone }}
-          </div>
-        {% endif %}
-        {% if business.email %}
-          <div class="flex items-center gap-2">
-            <i data-lucide="mail" class="w-4 h-4 text-slate-400"></i> {{ business.email }}
-          </div>
-        {% endif %}
-        {% if business.address %}
-          <div class="flex items-center gap-2">
-            <i data-lucide="map" class="w-4 h-4 text-slate-400"></i> {{ business.address }}
-          </div>
-        {% endif %}
-      </div>
-
-      <!-- Description & Gallery Grid -->
-      <div class="p-6 sm:p-8">
+      <!-- RIGHT MAIN CONTENT: Services, About, Gallery -->
+      <div class="lg:col-span-8 space-y-8">
+        
         {% if business.description %}
-          <div class="prose prose-slate max-w-none text-slate-600 mb-8">
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
+          <h3 class="text-xl font-extrabold text-slate-900 mb-4">About Us</h3>
+          <div class="prose prose-slate max-w-none text-slate-600 leading-relaxed font-medium">
             {{ business.description|linebreaks }}
           </div>
+        </div>
         {% endif %}
 
-        {% if business.gallery_images.count > 1 %}
-          <h3 class="text-lg font-bold text-slate-900 mb-4">Gallery</h3>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {% if business.gallery_images.exists %}
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
+          <h3 class="text-xl font-extrabold text-slate-900 mb-6 flex items-center justify-between">
+            Gallery
+            <span class="text-sm font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">{{ business.gallery_images.count }} Photos</span>
+          </h3>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
             {% for img in business.gallery_images.all %}
-              <a href="{{ img.image.url }}" target="_blank" class="block aspect-square rounded-xl overflow-hidden bg-slate-100 border border-slate-200 group">
-                <img src="{{ img.image.url }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+              <a href="{{ img.image.url }}" target="_blank" class="block aspect-square rounded-2xl overflow-hidden bg-slate-100 border border-slate-100 group relative shadow-sm">
+                <img src="{{ img.image.url }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                  <i data-lucide="maximize-2" class="text-white opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6"></i>
+                </div>
               </a>
             {% endfor %}
           </div>
+        </div>
         {% endif %}
-      </div>
-    </div>
 
-    <!-- Services Section -->
-    <h2 class="text-2xl font-extrabold text-slate-900 mb-6 flex items-center gap-2">
-      <i data-lucide="calendar-check" class="w-6 h-6 text-indigo-600"></i> Book a Service
-    </h2>
-    
-    <div class="space-y-4">
-      {% for service in services %}
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-indigo-200 hover:shadow-md transition-all">
-          <div class="flex-1">
-            <h3 class="text-lg font-bold text-slate-900 mb-1">{{ service.service_name }}</h3>
-            <p class="text-sm font-medium text-slate-500 mb-2 flex items-center gap-4">
-              <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4"></i> {{ service.duration }} mins</span>
-            </p>
-            {% if service.description %}
-              <p class="text-sm text-slate-600 line-clamp-2">{{ service.description }}</p>
-            {% endif %}
-          </div>
-          <div class="flex sm:flex-col items-center sm:items-end justify-between gap-4 sm:gap-2 shrink-0">
-            <div class="text-xl font-extrabold text-indigo-600">₹{{ service.price }}</div>
-            <a href="{% url 'website:book_service' service.id %}" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors shadow-sm shadow-indigo-200 whitespace-nowrap text-sm">
-              Book Appointment
-            </a>
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
+          <h2 class="text-2xl font-extrabold text-slate-900 mb-6 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center"><i data-lucide="calendar-check" class="w-5 h-5"></i></div>
+            Book a Service
+          </h2>
+          
+          <div class="space-y-4">
+            {% for service in services %}
+              <div class="group border border-slate-200 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-100/50 transition-all bg-white relative overflow-hidden">
+                <!-- Hover gradient accent -->
+                <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500 transform -translate-x-full group-hover:translate-x-0 transition-transform"></div>
+                
+                <div class="flex-1">
+                  <h3 class="text-lg font-extrabold text-slate-900 mb-1 group-hover:text-indigo-700 transition-colors">{{ service.service_name }}</h3>
+                  <p class="text-sm font-bold text-slate-400 mb-2.5 flex items-center gap-2">
+                    <span class="flex items-center gap-1.5 bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md"><i data-lucide="clock" class="w-3.5 h-3.5"></i> {{ service.duration }} mins</span>
+                  </p>
+                  {% if service.description %}
+                    <p class="text-sm text-slate-600 font-medium line-clamp-2 leading-relaxed">{{ service.description }}</p>
+                  {% endif %}
+                </div>
+                <div class="flex sm:flex-col items-center sm:items-end justify-between gap-4 sm:gap-3 shrink-0">
+                  <div class="text-2xl font-black text-slate-900">₹{{ service.price }}</div>
+                  <a href="{% url 'website:book_service' service.id %}" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-md shadow-indigo-200 whitespace-nowrap text-sm hover:-translate-y-0.5 w-full sm:w-auto text-center">
+                    Book Now
+                  </a>
+                </div>
+              </div>
+            {% empty %}
+              <div class="text-center py-16 bg-slate-50 rounded-2xl border border-slate-100 border-dashed">
+                <i data-lucide="inbox" class="w-12 h-12 text-slate-300 mx-auto mb-4"></i>
+                <h3 class="font-bold text-slate-900 mb-1">No services available</h3>
+                <p class="text-sm text-slate-500 font-medium">This business hasn't listed any services yet.</p>
+              </div>
+            {% endfor %}
           </div>
         </div>
-      {% empty %}
-        <div class="text-center py-12 bg-white rounded-2xl border border-slate-200">
-          <i data-lucide="inbox" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
-          <h3 class="font-bold text-slate-900">No services available</h3>
-          <p class="text-sm text-slate-500">This business hasn't listed any services yet.</p>
-        </div>
-      {% endfor %}
+        
+      </div>
     </div>
   </div>
 </div>

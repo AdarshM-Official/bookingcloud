@@ -187,6 +187,17 @@ def api_get_slots(request, service_id):
     except ValueError:
         return JsonResponse({'error': 'Invalid date format'}, status=400)
         
+    # Check if the business is on an off day
+    from apps.dashboard.models import BusinessTimeOff
+    is_off_day = BusinessTimeOff.objects.filter(
+        business=business,
+        start_date__lte=booking_date,
+        end_date__gte=booking_date
+    ).exists()
+    
+    if is_off_day:
+        return JsonResponse({'slots': []})
+        
     # Get all non-cancelled bookings for this business on this date
     existing_bookings = Booking.objects.filter(
         business=business, 
@@ -222,70 +233,57 @@ def api_get_slots(request, service_id):
 def book_service(request, service_id):
     service = get_object_or_404(Service, id=service_id)
     business = service.business
+    staff_members = service.staff_members.filter(is_active=True)
     
     if request.method == 'POST':
         date_str = request.POST.get('date')
         time_str = request.POST.get('time')
         notes = request.POST.get('notes', '')
+        staff_id = request.POST.get('staff_id')
         
         try:
             booking_date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
-            start_time = datetime.datetime.strptime(time_str, '%H:%M').time()
+            booking_time = datetime.datetime.strptime(time_str, '%H:%M').time()
+            end_time = (datetime.datetime.combine(datetime.date.today(), booking_time) + datetime.timedelta(minutes=service.duration)).time()
             
-            start_dt = datetime.datetime.combine(booking_date, start_time)
-            end_dt = start_dt + datetime.timedelta(minutes=service.duration)
-            end_time = end_dt.time()
-            
-            # Check for double booking
-            overlap = Booking.objects.filter(
+            overlap_query = Booking.objects.filter(
                 business=business,
                 date=booking_date,
-                start_time__lt=end_time,
-                end_time__gt=start_time
-            ).exclude(status='cancelled').exists()
+                status__in=['pending', 'confirmed']
+            ).filter(
+                Q(start_time__lt=end_time) & Q(end_time__gt=booking_time)
+            )
             
-            if overlap:
-                messages.error(request, 'This time slot is already booked.')
-                # Calculate next available slot
-                current_dt = start_dt + datetime.timedelta(minutes=15)
-                closing_dt = datetime.datetime.combine(booking_date, business.closing_time)
-                increment = datetime.timedelta(minutes=service.duration)
+            if staff_id:
+                overlap_query = overlap_query.filter(staff_id=staff_id)
                 
-                next_slot = None
-                existing_bookings = Booking.objects.filter(business=business, date=booking_date).exclude(status='cancelled')
-                while current_dt + increment <= closing_dt:
-                    slot_overlap = False
-                    for b in existing_bookings:
-                        if b.start_time < (current_dt + increment).time() and b.end_time > current_dt.time():
-                            slot_overlap = True
-                            break
-                    if not slot_overlap:
-                        next_slot = current_dt.time().strftime('%H:%M')
-                        break
-                    current_dt += datetime.timedelta(minutes=15)
-                    
-                if next_slot:
-                    messages.info(request, f'Suggested next available slot: {next_slot}')
+            if overlap_query.exists():
+                # basic next slot generation
+                suggested_time = (datetime.datetime.combine(datetime.date.today(), overlap_query.last().end_time)).time().strftime('%H:%M')
+                messages.error(request, f'This time slot is already booked. Suggested next available slot: {suggested_time}')
+                return render(request, 'landing/book_service.html', {'service': service, 'business': business, 'selected_date': date_str, 'suggested_time': suggested_time, 'staff_members': staff_members})
+            
+            staff_obj = None
+            if staff_id:
+                from apps.dashboard.models import Staff
+                staff_obj = Staff.objects.filter(id=staff_id, business=business).first()
                 
-                return render(request, 'landing/book_service.html', {'service': service, 'business': business, 'suggested_time': next_slot, 'selected_date': date_str})
-
             Booking.objects.create(
                 business=business,
                 service=service,
+                staff=staff_obj,
                 customer=request.user,
                 date=booking_date,
-                start_time=start_time,
+                start_time=booking_time,
                 end_time=end_time,
-                notes=notes,
-                status='pending'
+                notes=notes
             )
             messages.success(request, f'Successfully booked {service.service_name} with {business.business_name}!')
             return redirect('website:my_bookings')
-            
         except ValueError:
             messages.error(request, 'Invalid date or time format.')
             
-    return render(request, 'landing/book_service.html', {'service': service, 'business': business})
+    return render(request, 'landing/book_service.html', {'service': service, 'business': business, 'staff_members': staff_members})
 
 def business_profile_view(request, business_id):
     business = get_object_or_404(Business, id=business_id, is_active=True)

@@ -25,8 +25,10 @@ SECRET_KEY = 'django-insecure-$tdrltcm2o=**ok6s%0y$terp(#0ska9yzq#gbjnhzkil9uhn1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '.localhost', '127.0.0.1', '.lvh.me']
 
+BASE_DOMAIN = 'localhost:8000'
+TENANT_PROTOCOL = 'http'
 
 # Application definition
 
@@ -46,6 +48,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'bookingsaas.middleware.TenantMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',

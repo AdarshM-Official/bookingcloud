@@ -3,202 +3,179 @@
 {% block page_title %}Business Profile{% endblock %}
 {% block breadcrumbs %}
   <span class="mx-2 text-slate-300">/</span>
-  <span class="text-slate-500">Business Profile</span>
+  <span class="text-slate-500">Settings</span>
+  <span class="mx-2 text-slate-300">/</span>
+  <span class="text-slate-500">Profile</span>
 {% endblock %}
 
 {% block content %}
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-    <div>
-      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Business Profile</h1>
-      <p class="text-slate-500 font-medium mt-1">Update your business details and public page information.</p>
-    </div>
-  </div>
-
-  {% if messages %}
-    <div class="mb-6 space-y-2">
-      {% for message in messages %}
-        <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-800{% else %}bg-emerald-50 border-emerald-200 text-emerald-800{% endif %} border font-medium text-sm flex items-center gap-2">
-          <i data-lucide="{% if message.tags == 'error' %}alert-circle{% else %}check-circle{% endif %}" class="w-5 h-5 {% if message.tags == 'error' %}text-red-500{% else %}text-emerald-500{% endif %}"></i>
-          {{ message }}
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden max-w-4xl">
-    <form action="{% url 'dashboard:profile' %}" method="POST" enctype="multipart/form-data">
-      {% csrf_token %}
-      
-      <!-- Top section with image upload -->
-      <div class="p-6 sm:p-8 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center gap-6">
-        <div class="relative shrink-0">
-          <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-slate-100 border-4 border-white shadow-md flex items-center justify-center text-slate-300">
-            {% if business.profile_image %}
-              <img src="{{ business.profile_image.url }}" alt="{{ business.business_name }}" class="w-full h-full object-cover">
-            {% else %}
-              <i data-lucide="image" class="w-10 h-10"></i>
-            {% endif %}
-          </div>
-          <label for="profile_image" class="absolute bottom-0 right-0 w-8 h-8 sm:w-10 sm:h-10 bg-brand-600 text-white rounded-full flex items-center justify-center cursor-pointer shadow-sm shadow-brand-200 hover:bg-brand-700 transition-colors border-2 border-white">
-            <i data-lucide="camera" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-            <input type="file" id="profile_image" name="profile_image" accept="image/*" class="hidden">
-          </label>
-        </div>
-        <div>
-          <h2 class="text-lg font-bold text-slate-900">Profile Picture</h2>
-          <p class="text-sm text-slate-500 mt-1">Upload a high-quality logo or storefront image to display on your public booking page. Recommended size: 512x512px.</p>
-        </div>
-      </div>
-
-      <!-- Main form fields -->
-      <div class="p-6 sm:p-8 space-y-8">
-        
-        <!-- Basic Info Section -->
-        <div>
-          <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider mb-4">Basic Information</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label for="business_name" class="block text-sm font-bold text-slate-700 mb-1.5">Business Name <span class="text-red-500">*</span></label>
-              <input type="text" id="business_name" name="business_name" required value="{{ business.business_name }}" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" />
-            </div>
-            <div>
-              <label for="category" class="block text-sm font-bold text-slate-700 mb-1.5">Business Category <span class="text-red-500">*</span></label>
-              <input type="text" id="category" name="category" required value="{{ business.category }}" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" />
-            </div>
-            <div class="sm:col-span-2">
-              <label for="description" class="block text-sm font-bold text-slate-700 mb-1.5">Business Description</label>
-              <textarea id="description" name="description" rows="4" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all resize-y">{{ business.description }}</textarea>
-              <p class="text-xs text-slate-500 mt-1.5">Tell your customers what makes your business special.</p>
-            </div>
-          </div>
-        </div>
-
-        <hr class="border-slate-100">
-
-        <!-- Contact Section -->
-        <div>
-          <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider mb-4">Contact Information</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label for="email" class="block text-sm font-bold text-slate-700 mb-1.5">Public Email</label>
-              <input type="email" id="email" name="email" value="{{ business.email }}" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" />
-            </div>
-            <div>
-              <label for="phone" class="block text-sm font-bold text-slate-700 mb-1.5">Contact Number</label>
-              <input type="text" id="phone" name="phone" value="{{ business.phone }}" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" />
-            </div>
-          </div>
-        </div>
-
-        <hr class="border-slate-100">
-
-        <!-- Location Section -->
-        <div>
-          <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider mb-4">Location</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div class="sm:col-span-2">
-              <label for="address" class="block text-sm font-bold text-slate-700 mb-1.5">Street Address</label>
-              <input type="text" id="address" name="address" value="{{ business.address }}" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" />
-            </div>
-            <div>
-              <label for="city" class="block text-sm font-bold text-slate-700 mb-1.5">City / Region</label>
-              <input type="text" id="city" name="city" value="{{ business.city }}" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" />
-            </div>
-          </div>
-        </div>
-
-        <hr class="border-slate-100">
-
-        <!-- Working Hours Section -->
-        <div>
-          <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider mb-4">Working Hours</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div>
-              <label for="working_days" class="block text-sm font-bold text-slate-700 mb-1.5">Working Days / Week</label>
-              <select id="working_days" name="working_days" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all">
-                {% for i in "1234567" %}
-                <option value="{{ i }}" {% if business.working_days|stringformat:"i" == i %}selected{% endif %}>{{ i }} Days</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div>
-              <label for="opening_time" class="block text-sm font-bold text-slate-700 mb-1.5">Opening Time</label>
-              <input type="time" id="opening_time" name="opening_time" required value="{{ business.opening_time|time:'H:i' }}" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" />
-            </div>
-            <div>
-              <label for="closing_time" class="block text-sm font-bold text-slate-700 mb-1.5">Closing Time</label>
-              <input type="time" id="closing_time" name="closing_time" required value="{{ business.closing_time|time:'H:i' }}" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" />
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Action Footer -->
-      <div class="p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
-        <a href="{% url 'dashboard:index' %}" class="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors">Cancel</a>
-        <button type="submit" class="flex items-center justify-center gap-2 bg-brand-600 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm shadow-brand-200 hover:bg-brand-700 transition-colors">
-          <i data-lucide="save" class="w-4 h-4"></i> Save Changes
-        </button>
-      </div>
-
-    </form>
-  </div>
+<div class="max-w-5xl mx-auto space-y-10 pb-12">
   
-  <!-- Gallery Management Section -->
-  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden max-w-4xl mt-8">
-    <div class="p-6 sm:p-8 border-b border-slate-100">
-      <h3 class="text-lg font-bold text-slate-900">Business Gallery</h3>
-      <p class="text-sm text-slate-500 mt-1">Upload photos of your workspace, team, or past work to showcase on your public page. (Multiple selection allowed in the edit form above)</p>
+  <div>
+    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Business Profile</h1>
+    <p class="text-slate-500 mt-2 font-medium">Manage how your business appears to customers on your public booking page.</p>
+  </div>
+
+  <form action="{% url 'dashboard:profile' %}" method="POST" enctype="multipart/form-data" class="space-y-12">
+    {% csrf_token %}
+    
+    <!-- Section 1: Basic Information -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-slate-200">
+      <div class="md:col-span-1">
+        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2"><i data-lucide="store" class="w-5 h-5 text-indigo-500"></i> Basic Details</h3>
+        <p class="text-sm text-slate-500 mt-2">Update your primary business info and logo. This is the first thing customers will see.</p>
+      </div>
+      
+      <div class="md:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+        
+        <!-- Profile Picture -->
+        <div>
+          <label class="block text-sm font-bold text-slate-700 mb-3">Profile Picture / Logo</label>
+          <div class="flex items-center gap-6">
+            <div class="relative group cursor-pointer">
+              <div class="w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center relative">
+                {% if business.profile_image %}
+                  <img src="{{ business.profile_image.url }}" class="w-full h-full object-cover">
+                {% else %}
+                  <i data-lucide="image" class="w-8 h-8 text-slate-400"></i>
+                {% endif %}
+                <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <i data-lucide="camera" class="w-6 h-6 text-white"></i>
+                </div>
+              </div>
+              <input type="file" id="profile_image" name="profile_image" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+            </div>
+            <div>
+              <p class="text-sm font-bold text-slate-900">Upload new image</p>
+              <p class="text-xs text-slate-500 mt-1">JPG, GIF or PNG. Max size of 5MB.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="sm:col-span-2">
+            <label for="business_name" class="block text-sm font-bold text-slate-700 mb-1.5">Business Name <span class="text-red-500">*</span></label>
+            <input type="text" id="business_name" name="business_name" required value="{{ business.business_name }}" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" />
+          </div>
+          <div class="sm:col-span-2">
+            <label for="category" class="block text-sm font-bold text-slate-700 mb-1.5">Category <span class="text-red-500">*</span></label>
+            <select id="category" name="category" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all">
+              <option value="Beauty & wellness" {% if business.category == 'Beauty & wellness' %}selected{% endif %}>Beauty & wellness</option>
+              <option value="Healthcare" {% if business.category == 'Healthcare' %}selected{% endif %}>Healthcare</option>
+              <option value="Fitness" {% if business.category == 'Fitness' %}selected{% endif %}>Fitness</option>
+              <option value="Education & coaching" {% if business.category == 'Education & coaching' %}selected{% endif %}>Education & coaching</option>
+              <option value="Professional consulting" {% if business.category == 'Professional consulting' %}selected{% endif %}>Professional consulting</option>
+              <option value="Creative services" {% if business.category == 'Creative services' %}selected{% endif %}>Creative services</option>
+              <option value="Automotive" {% if business.category == 'Automotive' %}selected{% endif %}>Automotive</option>
+              <option value="Home services" {% if business.category == 'Home services' %}selected{% endif %}>Home services</option>
+              <option value="Hospitality" {% if business.category == 'Hospitality' %}selected{% endif %}>Hospitality</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label for="description" class="block text-sm font-bold text-slate-700 mb-1.5">About the Business</label>
+            <textarea id="description" name="description" rows="4" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all resize-y">{{ business.description }}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Contact & Location -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-slate-200">
+      <div class="md:col-span-1">
+        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2"><i data-lucide="map-pin" class="w-5 h-5 text-indigo-500"></i> Contact & Location</h3>
+        <p class="text-sm text-slate-500 mt-2">Help your customers find and reach you easily.</p>
+      </div>
+      
+      <div class="md:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <label for="email" class="block text-sm font-bold text-slate-700 mb-1.5">Public Email</label>
+            <input type="email" id="email" name="email" value="{{ business.email }}" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" />
+          </div>
+          <div>
+            <label for="phone" class="block text-sm font-bold text-slate-700 mb-1.5">Contact Number</label>
+            <input type="text" id="phone" name="phone" value="{{ business.phone }}" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" />
+          </div>
+          <div class="sm:col-span-2">
+            <label for="address" class="block text-sm font-bold text-slate-700 mb-1.5">Street Address</label>
+            <input type="text" id="address" name="address" value="{{ business.address }}" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" />
+          </div>
+          <div>
+            <label for="city" class="block text-sm font-bold text-slate-700 mb-1.5">City / Region</label>
+            <input type="text" id="city" name="city" value="{{ business.city }}" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Footer -->
+    <div class="flex items-center justify-end gap-4 pt-6">
+      <a href="{% url 'dashboard:index' %}" class="px-6 py-3 text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors">Cancel</a>
+      <button type="submit" class="flex items-center justify-center gap-2 bg-brand-600 text-white font-bold px-8 py-3 rounded-xl shadow-md shadow-brand-200 hover:bg-brand-700 hover:-translate-y-0.5 transition-all">
+        <i data-lucide="save" class="w-5 h-5"></i> Save Profile
+      </button>
+    </div>
+
+  </form>
+  
+  <!-- Section 4: Gallery Management -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-12 border-t border-slate-200">
+    <div class="md:col-span-1">
+      <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2"><i data-lucide="images" class="w-5 h-5 text-indigo-500"></i> Business Gallery</h3>
+      <p class="text-sm text-slate-500 mt-2">Upload photos of your workspace, team, or past work to showcase on your public page.</p>
     </div>
     
-    <div class="p-6 sm:p-8">
-      <form action="{% url 'dashboard:profile' %}" method="POST" enctype="multipart/form-data" class="mb-8 p-6 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 flex flex-col items-center justify-center text-center hover:bg-slate-100 hover:border-brand-300 transition-all cursor-pointer relative">
+    <div class="md:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+      <form action="{% url 'dashboard:profile' %}" method="POST" enctype="multipart/form-data" class="mb-8 p-8 border-2 border-dashed border-slate-300 rounded-2xl bg-slate-50/50 flex flex-col items-center justify-center text-center hover:bg-slate-50 hover:border-brand-400 transition-all cursor-pointer relative">
         {% csrf_token %}
         <input type="file" name="gallery_images" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="this.form.submit()">
-        <i data-lucide="image-plus" class="w-8 h-8 text-brand-500 mb-3"></i>
-        <h4 class="text-sm font-bold text-slate-700 mb-1">Click or drag images to upload</h4>
-        <p class="text-xs text-slate-500">Supports JPG, PNG (Max 5MB per image)</p>
+        <div class="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4">
+          <i data-lucide="image-plus" class="w-8 h-8 text-brand-500"></i>
+        </div>
+        <h4 class="text-base font-bold text-slate-900 mb-1">Click or drag images to upload</h4>
+        <p class="text-sm text-slate-500">Supports JPG, PNG (Max 5MB per image)</p>
       </form>
       
       {% if business.gallery_images.all %}
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-6">
           {% for img in business.gallery_images.all %}
-            <div class="group relative rounded-lg overflow-hidden border border-slate-200 aspect-square bg-slate-100">
-              <img src="{{ img.image.url }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
-              <div class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                <a href="{% url 'dashboard:gallery_image_delete' img.pk %}" onclick="return confirm('Are you sure you want to delete this image?');" class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all">
-                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <div class="group relative rounded-xl overflow-hidden border border-slate-200 aspect-square bg-slate-100 shadow-sm">
+              <img src="{{ img.image.url }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+              <div class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/50 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                <a href="{% url 'dashboard:gallery_image_delete' img.pk %}" onclick="return confirm('Are you sure you want to delete this image?');" class="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all">
+                  <i data-lucide="trash-2" class="w-5 h-5"></i>
                 </a>
               </div>
             </div>
           {% endfor %}
         </div>
       {% else %}
-        <div class="text-center py-8">
-          <p class="text-sm font-medium text-slate-400">No images in your gallery yet.</p>
+        <div class="text-center py-10 bg-slate-50 rounded-xl border border-slate-100 border-dashed">
+          <i data-lucide="image" class="w-10 h-10 text-slate-300 mx-auto mb-3"></i>
+          <p class="text-sm font-medium text-slate-500">No images in your gallery yet.</p>
         </div>
       {% endif %}
     </div>
   </div>
+
+</div>
   
-  <script>
-    // Simple image preview logic
-    document.addEventListener('DOMContentLoaded', () => {
-      const fileInput = document.getElementById('profile_image');
-      if(fileInput) {
-        fileInput.addEventListener('change', function(e) {
-          if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              // Find the image container and replace its content with the new image
-              const container = fileInput.closest('.relative').querySelector('.bg-slate-100');
-              container.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
-            }
-            reader.readAsDataURL(this.files[0]);
+<script>
+  // Simple image preview logic
+  document.addEventListener('DOMContentLoaded', () => {
+    const fileInput = document.getElementById('profile_image');
+    if(fileInput) {
+      fileInput.addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const container = fileInput.closest('.relative').querySelector('div');
+            container.innerHTML = <img src="" class="w-full h-full object-cover rounded-2xl">;
           }
-        });
-      }
-    });
-  </script>
+          reader.readAsDataURL(this.files[0]);
+        }
+      });
+    }
+  });
+</script>
 {% endblock %}

@@ -1,0 +1,176 @@
+{% extends 'tenant/base.html' %}
+
+{% block page_title %}
+  Book {{ service.service_name }} | {{ tenant.business_name }}
+{% endblock %}
+
+{% block content %}
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="mb-10 text-center">
+      <h1 class="text-3xl font-black text-slate-900 mb-2">Book Appointment</h1>
+      <p class="text-slate-500 font-medium">
+        You are booking with <span class="font-bold text-tenant">{{ tenant.business_name }}</span>
+      </p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+      <div class="mb-8">
+        {% for message in messages %}
+          <div class="p-4 rounded-xl font-medium {% if message.tags == 'error' %}
+              bg-rose-50 text-rose-700
+            {% else %}
+              bg-emerald-50 text-emerald-700
+            {% endif %}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+      <!-- Service Info -->
+      <div class="bg-slate-50 border-b border-slate-200 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-200 flex items-center justify-center text-tenant shrink-0">
+            <i data-lucide="sparkles" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-extrabold text-slate-900">{{ service.service_name }}</h2>
+            <p class="text-sm font-medium text-slate-500 mt-0.5">{{ service.duration }} minutes</p>
+          </div>
+        </div>
+        <div class="text-left sm:text-right">
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-0.5">Total Price</p>
+          <p class="text-2xl font-black text-tenant">₹{{ service.price }}</p>
+        </div>
+      </div>
+
+      <form method="POST" class="p-6 sm:p-8 space-y-8">
+        {% csrf_token %}
+
+        <!-- Grid: Date & Time -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <label for="booking_date" class="block text-sm font-bold text-slate-700 mb-2">Select Date <span class="text-rose-500">*</span></label>
+            <div class="relative">
+              <i data-lucide="calendar" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <input type="date" id="booking_date" name="booking_date" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 outline-none focus:bg-white focus:border-tenant focus:ring-2 focus:ring-tenant/20 transition-all cursor-pointer" />
+            </div>
+          </div>
+
+          <div id="time_container" class="opacity-50 pointer-events-none transition-opacity duration-300">
+            <label for="booking_time" class="block text-sm font-bold text-slate-700 mb-2">Select Time <span class="text-rose-500">*</span></label>
+            <div class="relative">
+              <i data-lucide="clock" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <select id="booking_time" name="booking_time" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 outline-none focus:bg-white focus:border-tenant focus:ring-2 focus:ring-tenant/20 transition-all cursor-pointer appearance-none">
+                <option value="">-- Choose a date first --</option>
+              </select>
+              <i data-lucide="chevron-down" class="w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+            </div>
+            <p id="time_help" class="text-xs font-medium text-slate-500 mt-2">Please pick a date to see available slots.</p>
+          </div>
+        </div>
+
+        {% if staff_members %}
+          <div>
+            <label for="staff_id" class="block text-sm font-bold text-slate-700 mb-2">Preferred Professional (Optional)</label>
+            <div class="relative">
+              <select id="staff_id" name="staff_id" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 outline-none focus:bg-white focus:border-tenant focus:ring-2 focus:ring-tenant/20 transition-all appearance-none cursor-pointer">
+                <option value="">Any available staff</option>
+                {% for staff in staff_members %}
+                  <option value="{{ staff.id }}">{{ staff.first_name }} {{ staff.last_name }} - {{ staff.job_title|default:'Staff' }}</option>
+                {% endfor %}
+              </select>
+              <i data-lucide="chevron-down" class="w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="border-t border-slate-200 pt-8">
+          <h3 class="text-lg font-bold text-slate-900 mb-6">Your Details</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Full Name <span class="text-rose-500">*</span></label>
+              <input type="text" name="customer_name" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:bg-white focus:border-tenant focus:ring-2 focus:ring-tenant/20 transition-all" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Phone Number <span class="text-rose-500">*</span></label>
+              <input type="tel" name="customer_phone" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:bg-white focus:border-tenant focus:ring-2 focus:ring-tenant/20 transition-all" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Email Address <span class="text-rose-500">*</span></label>
+              <input type="email" name="customer_email" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:bg-white focus:border-tenant focus:ring-2 focus:ring-tenant/20 transition-all" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Additional Notes (Optional)</label>
+              <textarea name="notes" rows="2" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:bg-white focus:border-tenant focus:ring-2 focus:ring-tenant/20 transition-all resize-none"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4">
+          <button type="submit" class="w-full py-4 bg-tenant text-white font-black rounded-xl shadow-lg hover:shadow-xl hover:opacity-90 transition-all text-lg flex justify-center items-center gap-2">Confirm Booking <i data-lucide="check" class="w-5 h-5"></i></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const dateInput = document.getElementById('booking_date')
+      const timeSelect = document.getElementById('booking_time')
+      const timeContainer = document.getElementById('time_container')
+      const timeHelp = document.getElementById('time_help')
+      const staffSelect = document.getElementById('staff_id')
+    
+      // Min date is today
+      dateInput.min = new Date().toISOString().split('T')[0]
+    
+      const fetchSlots = async (date) => {
+        timeHelp.textContent = 'Loading available slots...'
+    
+        let url = '/api/slots/{{ service.id }}/?date=' + date
+        if (staffSelect && staffSelect.value) {
+          url += '&staff_id=' + staffSelect.value
+        }
+    
+        try {
+          const response = await fetch(url)
+          const data = await response.json()
+    
+          timeSelect.innerHTML = ''
+    
+          if (data.slots && data.slots.length > 0) {
+            timeContainer.classList.remove('opacity-50', 'pointer-events-none')
+            timeSelect.innerHTML = '<option value="">-- Select a time slot --</option>'
+    
+            data.slots.forEach((slot) => {
+              const opt = document.createElement('option')
+              opt.value = slot.time
+              opt.textContent = slot.display
+              timeSelect.appendChild(opt)
+            })
+    
+            timeHelp.textContent = data.slots.length + ' slots available.'
+            timeHelp.classList.add('text-emerald-600')
+          } else {
+            timeSelect.innerHTML = '<option value="">-- Fully Booked --</option>'
+            timeHelp.textContent = 'No available slots for this selection.'
+            timeHelp.classList.add('text-rose-500')
+          }
+        } catch (err) {
+          timeHelp.textContent = 'Error loading slots.'
+        }
+      }
+    
+      dateInput.addEventListener('change', (e) => {
+        if (e.target.value) fetchSlots(e.target.value)
+      })
+    
+      if (staffSelect) {
+        staffSelect.addEventListener('change', () => {
+          if (dateInput.value) fetchSlots(dateInput.value)
+        })
+      }
+    })
+  </script>
+{% endblock %}

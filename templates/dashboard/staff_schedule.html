@@ -1,0 +1,99 @@
+﻿{% extends 'dashboard/base.html' %}
+
+{% block page_title %}{{ staff.first_name }}'s Schedule{% endblock %}
+
+{% block breadcrumbs %}
+  <span class="mx-2 text-slate-300">/</span>
+  <a href="{% url 'dashboard:staff_list' %}" class="text-slate-500 hover:text-slate-900 transition-colors">Staff</a>
+  <span class="mx-2 text-slate-300">/</span>
+  <a href="{% url 'dashboard:staff_detail' staff.pk %}" class="text-slate-500 hover:text-slate-900 transition-colors">{{ staff.first_name }}</a>
+  <span class="mx-2 text-slate-300">/</span>
+  <span class="text-slate-500">Schedule</span>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto pb-12">
+  
+  <div class="mb-8">
+    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Weekly Schedule</h1>
+    <p class="text-slate-500 mt-2 font-medium">Define regular working hours for {{ staff.first_name }} {{ staff.last_name }}.</p>
+  </div>
+
+  <form method="POST" class="space-y-6">
+    {% csrf_token %}
+    
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      
+      <!-- Table Header -->
+      <div class="hidden sm:grid grid-cols-12 gap-4 p-4 bg-slate-50 border-b border-slate-200 text-xs font-extrabold text-slate-500 uppercase tracking-wider">
+        <div class="col-span-3">Day</div>
+        <div class="col-span-4">Start Time</div>
+        <div class="col-span-5">End Time</div>
+      </div>
+      
+      <!-- Days -->
+      <div class="divide-y divide-slate-100">
+        {% for s in schedules %}
+        <div class="p-4 sm:p-5 hover:bg-slate-50/50 transition-colors">
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+            
+            <!-- Toggle & Day -->
+            <div class="sm:col-span-3 flex items-center gap-3">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="working_{{ s.day_idx }}" class="sr-only peer toggle-working" data-target="times_{{ s.day_idx }}" {% if s.avail.is_working %}checked{% endif %}>
+                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-brand-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
+              </label>
+              <span class="font-bold text-slate-900">{{ s.name }}</span>
+            </div>
+            
+            <!-- Times Container -->
+            <div id="times_{{ s.day_idx }}" class="sm:col-span-9 grid grid-cols-2 gap-4 transition-opacity {% if not s.avail.is_working %}opacity-30 pointer-events-none{% endif %}">
+              <div>
+                <span class="sm:hidden block text-xs font-bold text-slate-500 mb-1">Start Time</span>
+                <input type="time" name="start_{{ s.day_idx }}" value="{{ s.avail.start_time|time:'H:i'|default:'' }}" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all">
+              </div>
+              <div>
+                <span class="sm:hidden block text-xs font-bold text-slate-500 mb-1">End Time</span>
+                <input type="time" name="end_{{ s.day_idx }}" value="{{ s.avail.end_time|time:'H:i'|default:'' }}" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all">
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    
+    <div class="flex justify-end gap-4 pt-4">
+      <a href="{% url 'dashboard:staff_detail' staff.pk %}" class="px-6 py-3 font-bold text-slate-600 hover:text-slate-900 transition-colors">Cancel</a>
+      <button type="submit" class="px-8 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md shadow-brand-200 transition-all">
+        Save Schedule
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  document.querySelectorAll('.toggle-working').forEach(toggle => {
+    toggle.addEventListener('change', function() {
+      const targetId = this.dataset.target;
+      const timeContainer = document.getElementById(targetId);
+      if(this.checked) {
+        timeContainer.classList.remove('opacity-30', 'pointer-events-none');
+        // Add required attribute dynamically if working
+        timeContainer.querySelectorAll('input[type="time"]').forEach(input => input.required = true);
+      } else {
+        timeContainer.classList.add('opacity-30', 'pointer-events-none');
+        // Remove required attribute
+        timeContainer.querySelectorAll('input[type="time"]').forEach(input => input.required = false);
+      }
+    });
+    
+    // Initialize required state on load
+    if(toggle.checked) {
+      document.getElementById(toggle.dataset.target).querySelectorAll('input[type="time"]').forEach(input => input.required = true);
+    }
+  });
+</script>
+{% endblock %}

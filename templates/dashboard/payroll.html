@@ -1,0 +1,146 @@
+﻿{% extends 'dashboard/base.html' %}
+
+{% block page_title %}Payroll Management{% endblock %}
+
+{% block breadcrumbs %}
+  <span class="mx-2 text-slate-300">/</span>
+  <span class="text-slate-500">Payroll</span>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-8 pb-12">
+  
+  <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Company Payroll</h1>
+      <p class="text-slate-500 mt-2 font-medium">Manage salaries, commissions, and track pending dues for your entire staff.</p>
+    </div>
+    
+    <!-- Month Picker -->
+    <div class="bg-white p-2 rounded-xl border border-slate-200 shadow-sm flex items-center">
+      <form method="GET" class="flex items-center gap-2">
+        <label for="month" class="text-sm font-bold text-slate-500 pl-2">Period:</label>
+        <input type="month" id="month" name="month" value="{{ month_str }}" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-900 focus:border-brand-500 outline-none transition-all cursor-pointer" onchange="this.form.submit()">
+      </form>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+      <p class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">Total Net Payable</p>
+      <h3 class="text-2xl font-black text-slate-900">₹{{ total_net }}</h3>
+      <p class="text-xs font-medium text-slate-400 mt-1">For {{ month_date|date:"F Y" }}</p>
+    </div>
+    <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 shadow-sm">
+      <p class="text-sm font-bold text-emerald-500 uppercase tracking-wider mb-2">Total Paid</p>
+      <h3 class="text-2xl font-black text-emerald-900">₹{{ total_paid }}</h3>
+      <p class="text-xs font-medium text-emerald-400 mt-1">Cleared this month</p>
+    </div>
+    <div class="bg-rose-50 border border-rose-100 rounded-2xl p-6 shadow-sm">
+      <p class="text-sm font-bold text-rose-500 uppercase tracking-wider mb-2">Total Pending</p>
+      <h3 class="text-2xl font-black text-rose-900">₹{{ total_pending }}</h3>
+      <p class="text-xs font-medium text-rose-400 mt-1">Awaiting payment</p>
+    </div>
+  </div>
+  
+  <div class="flex items-center justify-between mt-8 mb-4">
+    <h3 class="text-lg font-bold text-slate-900">Staff Payrolls for {{ month_date|date:"F Y" }}</h3>
+    <form method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="generate_all">
+      <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-sm text-sm transition-colors">
+        Auto-Generate Missing Payrolls
+      </button>
+    </form>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-50 text-xs font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+            <th class="px-6 py-4">Staff Member</th>
+            <th class="px-6 py-4">Base Salary</th>
+            <th class="px-6 py-4">Extras (Inc / Ded)</th>
+            <th class="px-6 py-4">Net Payable</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for item in staff_data %}
+            <tr class="hover:bg-slate-50/50 transition-colors">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  {% if item.staff.profile_image %}
+                    <img src="{{ item.staff.profile_image.url }}" class="w-10 h-10 rounded-full object-cover border border-slate-200">
+                  {% else %}
+                    <div class="w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center text-brand-500 border border-brand-100 font-bold">
+                      {{ item.staff.first_name|first }}
+                    </div>
+                  {% endif %}
+                  <div>
+                    <p class="text-sm font-bold text-slate-900">{{ item.staff.first_name }} {{ item.staff.last_name }}</p>
+                    <p class="text-xs text-slate-500 font-medium">{{ item.staff.get_salary_type_display }}</p>
+                  </div>
+                </div>
+              </td>
+              
+              {% if item.payroll %}
+                <td class="px-6 py-4 text-sm font-bold text-slate-700">₹{{ item.payroll.base_amount }}</td>
+                <td class="px-6 py-4 text-sm">
+                  <span class="text-emerald-600 font-bold block">+₹{{ item.payroll.incentives }}</span>
+                  <span class="text-rose-600 font-bold block">-₹{{ item.payroll.deductions }}</span>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="text-base font-black text-slate-900">₹{{ item.payroll.net_payable }}</span>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-full 
+                    {% if item.payroll.status == 'paid' %}bg-emerald-100 text-emerald-700
+                    {% elif item.payroll.status == 'partially_paid' %}bg-amber-100 text-amber-700
+                    {% else %}bg-rose-100 text-rose-700{% endif %}">
+                    {{ item.payroll.get_status_display }}
+                  </span>
+                  {% if item.payroll.status != 'paid' %}
+                    <p class="text-xs text-slate-500 mt-1 font-medium">Paid: ₹{{ item.payroll.amount_paid }}</p>
+                  {% endif %}
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    {% if item.payroll.status != 'paid' %}
+                    <form method="POST" class="inline">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="mark_paid">
+                      <input type="hidden" name="payroll_id" value="{{ item.payroll.id }}">
+                      <button type="submit" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-lg transition-colors" title="Mark as Fully Paid">Pay All</button>
+                    </form>
+                    {% endif %}
+                    <a href="{% url 'dashboard:staff_payroll' item.staff.pk %}" class="px-3 py-1.5 bg-white border border-slate-200 hover:border-brand-500 text-slate-700 hover:text-brand-700 text-xs font-bold rounded-lg transition-colors">Edit</a>
+                  </div>
+                </td>
+              {% else %}
+                <td colspan="4" class="px-6 py-4 text-sm text-slate-400 italic">No payroll record generated for this month.</td>
+                <td class="px-6 py-4 text-right">
+                  <a href="{% url 'dashboard:staff_payroll' item.staff.pk %}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-colors">Generate</a>
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+          
+          {% if not staff_data %}
+            <tr>
+              <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                <p class="mb-2">No staff members found.</p>
+                <a href="{% url 'dashboard:staff_add' %}" class="text-brand-600 font-bold hover:underline">Add a staff member</a>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

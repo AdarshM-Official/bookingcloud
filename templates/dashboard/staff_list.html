@@ -1,0 +1,74 @@
+{% extends 'dashboard/base.html' %}
+
+{% block page_title %}
+  Team Management
+{% endblock %}
+
+{% block breadcrumbs %}
+  <span class="mx-2 text-slate-300">/</span>
+  <span class="text-slate-500">Staff</span>
+{% endblock %}
+
+{% block content %}
+  <div class="max-w-6xl mx-auto">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Team Members</h1>
+        <p class="text-slate-500 mt-2 font-medium">Manage your staff, assign services, and set schedules.</p>
+      </div>
+      <a href="{% url 'dashboard:staff_add' %}" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-sm shadow-brand-200 transition-all flex items-center gap-2"><i data-lucide="plus" class="w-5 h-5"></i> Add Staff</a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for staff in staff_members %}
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col hover:border-brand-300 hover:shadow-lg transition-all relative group overflow-hidden shadow-sm">
+          {% if not staff.is_active %}
+            <div class="absolute top-4 right-4 bg-red-50 text-red-600 text-xs font-bold px-2.5 py-1 rounded-md border border-red-100">Inactive</div>
+          {% endif %}
+
+          <div class="flex items-center gap-4 mb-5">
+            {% if staff.profile_image %}
+              <img src="{{ staff.profile_image.url }}" class="w-16 h-16 rounded-full object-cover border border-slate-100 shadow-sm" />
+            {% else %}
+              <div class="w-16 h-16 rounded-full bg-brand-50 flex items-center justify-center border border-brand-100 shadow-sm text-brand-400">
+                <i data-lucide="user" class="w-8 h-8"></i>
+              </div>
+            {% endif %}
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">{{ staff.first_name }} {{ staff.last_name }}</h3>
+              <p class="text-sm font-medium text-brand-600">{{ staff.job_title|default:'Staff Member' }}</p>
+            </div>
+          </div>
+
+          <div class="mb-5 flex-1">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Assigned Services</p>
+            <div class="flex flex-wrap gap-1.5">
+              {% for s in staff.services.all|slice:':3' %}
+                <span class="inline-block px-2 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-md">{{ s.service_name }}</span>
+              {% empty %}
+                <span class="text-sm text-slate-400 italic">No services assigned</span>
+              {% endfor %}
+              {% if staff.services.count > 3 %}
+                <span class="inline-block px-2 py-1 bg-slate-50 text-slate-500 text-xs font-bold rounded-md">+{{ staff.services.count|add:'-3' }} more</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 pt-5 border-t border-slate-100">
+            <a href="{% url 'dashboard:staff_detail' staff.pk %}" class="flex-1 px-4 py-2 bg-white border-2 border-slate-200 hover:border-brand-600 hover:text-brand-700 text-slate-700 font-bold rounded-xl text-center text-sm transition-colors min-w-[80px]">Manage</a>
+            <a href="{% url 'dashboard:staff_payroll' staff.pk %}" class="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-xl transition-colors border border-emerald-100" title="Payroll"><i data-lucide="banknote" class="w-4 h-4 sm:w-5 sm:h-5"></i></a>
+            <a href="{% url 'dashboard:staff_leaves' staff.pk %}" class="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-xl transition-colors border border-amber-100" title="Leaves"><i data-lucide="calendar-off" class="w-4 h-4 sm:w-5 sm:h-5"></i></a>
+            <a href="{% url 'dashboard:staff_schedule' staff.pk %}" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-colors border border-slate-100" title="Edit Schedule"><i data-lucide="calendar-clock" class="w-4 h-4 sm:w-5 sm:h-5"></i></a>
+          </div>
+        </div>
+      {% empty %}
+        <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-slate-200 border-dashed">
+          <i data-lucide="users" class="w-16 h-16 text-slate-300 mx-auto mb-4"></i>
+          <h3 class="text-xl font-extrabold text-slate-900 mb-2">Build your team</h3>
+          <p class="text-slate-500 font-medium mb-6 max-w-sm mx-auto">Add your staff members to assign services, manage schedules, and accept staff-based bookings.</p>
+          <a href="{% url 'dashboard:staff_add' %}" class="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-sm inline-block">+ Add Your First Staff Member</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

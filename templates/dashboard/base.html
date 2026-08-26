@@ -65,6 +65,12 @@
           <a href="{% url 'dashboard:services' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if 'service' in request.resolver_match.url_name %}bg-brand-600/10 text-brand-400{% else %}text-slate-300 hover:bg-slate-800 hover:text-white{% endif %}">
             <i data-lucide="layers" class="w-5 h-5"></i> Services
           </a>
+          <a href="{% url 'dashboard:staff_list' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if 'staff' in request.resolver_match.url_name %}bg-brand-600/10 text-brand-400{% else %}text-slate-300 hover:bg-slate-800 hover:text-white{% endif %}">
+            <i data-lucide="contact-2" class="w-5 h-5"></i> Staff
+          </a>
+          <a href="{% url 'dashboard:payroll' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if 'payroll' in request.resolver_match.url_name %}bg-brand-600/10 text-brand-400{% else %}text-slate-300 hover:bg-slate-800 hover:text-white{% endif %}">
+            <i data-lucide="banknote" class="w-5 h-5"></i> Payroll
+          </a>
           <a href="{% url 'dashboard:customers' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'customers' %}bg-brand-600/10 text-brand-400{% else %}text-slate-300 hover:bg-slate-800 hover:text-white{% endif %}">
             <i data-lucide="users" class="w-5 h-5"></i> Customers
           </a>
