@@ -1,4 +1,4 @@
-﻿{% extends 'dashboard/base.html' %}
+{% extends 'dashboard/base.html' %}
 
 {% block page_title %}
   Manage Booking
@@ -91,7 +91,7 @@
                             <option value="">-- Unassigned --</option>
                             {% for staff in staff_members %}
                                 <option value="{{ staff.id }}" {% if booking.staff_id == staff.id %}selected{% endif %}>
-                                    {{ staff.user.get_full_name|default:staff.user.username }}
+                                    {{ staff.first_name }} {{ staff.last_name }}
                                 </option>
                             {% endfor %}
                         </select>
