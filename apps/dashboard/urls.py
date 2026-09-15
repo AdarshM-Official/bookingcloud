@@ -21,10 +21,10 @@ urlpatterns = [
     path('staff/<int:pk>/payroll/', views.staff_payroll_view, name='staff_payroll'),
     path('staff/<int:pk>/leaves/', views.staff_leave_view, name='staff_leaves'),
     path('payroll/', views.payroll_list_view, name='payroll'),
-    path('customers/', views.customers_view, name='customers'),
     path('availability/', views.availability_view, name='availability'),
-    path('analytics/', views.analytics_view, name='analytics'),
     path('profile/', views.profile_view, name='profile'),
     path('profile/gallery/<int:pk>/delete/', views.gallery_image_delete, name='gallery_image_delete'),
     path('settings/', views.settings_view, name='settings'),
+    path('support/', views.support_view, name='support'),
 ]
+

@@ -268,6 +268,8 @@ def book_service(request, service_id):
                 from apps.dashboard.models import Staff
                 staff_obj = Staff.objects.filter(id=staff_id, business=business).first()
                 
+            status = 'confirmed' if business.auto_accept_bookings else 'pending'
+                
             Booking.objects.create(
                 business=business,
                 service=service,
@@ -276,9 +278,13 @@ def book_service(request, service_id):
                 date=booking_date,
                 start_time=booking_time,
                 end_time=end_time,
-                notes=notes
+                notes=notes,
+                status=status
             )
-            messages.success(request, f'Successfully booked {service.service_name} with {business.business_name}!')
+            msg = f'Successfully booked {service.service_name} with {business.business_name}!'
+            if status == 'confirmed':
+                msg += ' Your booking has been automatically confirmed.'
+            messages.success(request, msg)
             return redirect('website:my_bookings')
         except ValueError:
             messages.error(request, 'Invalid date or time format.')

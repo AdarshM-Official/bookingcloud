@@ -1,4 +1,4 @@
-{% extends 'tenant/base.html' %}
+﻿{% extends 'tenant/base.html' %}
 
 {% block page_title %}
   Book {{ service.service_name }} | {{ tenant.business_name }}
@@ -40,7 +40,7 @@
         </div>
         <div class="text-left sm:text-right">
           <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-0.5">Total Price</p>
-          <p class="text-2xl font-black text-tenant">₹{{ service.price }}</p>
+          <p class="text-2xl font-black text-tenant">&#8377;{{ service.price }}</p>
         </div>
       </div>
 
@@ -174,3 +174,4 @@
     })
   </script>
 {% endblock %}
+

@@ -1,168 +1,189 @@
-{% extends 'dashboard/base.html' %}
+﻿{% extends 'dashboard/base.html' %}
+{% load static %}
 
-{% block page_title %}
-  Bookings
-{% endblock %}
-{% block breadcrumbs %}
-  <span class="mx-2 text-slate-300">/</span>
-  <span class="text-slate-500">Bookings</span>
-{% endblock %}
+{% block title %}Bookings | Dashboard{% endblock %}
 
 {% block content %}
-  <div class="max-w-7xl mx-auto pb-12">
-    <!-- Header Section -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
-      <div>
-        <h1 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-2">Bookings</h1>
-        <p class="text-slate-500 font-medium text-lg">Manage your customer appointments and schedule.</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <a href="{% url 'dashboard:calendar' %}" class="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all">
-          <i data-lucide="calendar" class="w-5 h-5 text-indigo-500"></i>
-          Calendar View
-        </a>
-      </div>
+<div class="max-w-6xl mx-auto space-y-8">
+  
+  <!-- Header & Command Bar -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+    <div>
+      <h1 class="text-2xl font-black text-slate-900">Bookings Management</h1>
+      <p class="text-sm text-slate-500 font-medium mt-1">Review and manage your customer appointments.</p>
     </div>
-
-    <!-- Alerts -->
-    {% if messages %}
-      <div class="mb-8 space-y-3">
-        {% for message in messages %}
-          <div class="p-4 rounded-xl font-bold flex items-center gap-3 shadow-sm {% if message.tags == 'error' %}
-              bg-rose-50 text-rose-700 border border-rose-100
-            {% else %}
-              bg-emerald-50 text-emerald-800 border border-emerald-100
-            {% endif %}">
-            {% if message.tags == 'error' %}
-              <i data-lucide="alert-circle" class="w-5 h-5 text-rose-500"></i>
-            {% else %}
-              <i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>
-            {% endif %}
-            {{ message }}
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-
-    <!-- Bookings Board -->
-    <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-200 overflow-hidden">
-      {% if bookings %}
-        <div class="overflow-x-auto">
-          <table class="w-full text-left">
-            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-black text-[11px] tracking-wider">
-              <tr>
-                <th class="px-8 py-5">Customer details</th>
-                <th class="px-8 py-5">Services Requested</th>
-                <th class="px-8 py-5">Schedule & Staff</th>
-                <th class="px-8 py-5 text-center">Status</th>
-                <th class="px-8 py-5 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              {% for booking in bookings %}
-                <tr class="hover:bg-indigo-50/30 transition-colors group">
-                  <!-- Customer -->
-                  <td class="px-8 py-6">
-                    <div class="flex items-center gap-3 mb-1">
-                      <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center">{{ booking.customer.first_name|default:booking.customer.username|slice:':1'|upper }}</div>
-                      <div>
-                        <div class="font-bold text-slate-900 text-base">{{ booking.customer.first_name }} {{ booking.customer.last_name }}</div>
-                        <div class="text-slate-500 text-sm font-medium">{{ booking.customer.email|default:'No email' }}</div>
-                      </div>
-                    </div>
-                  </td>
-
-                  <!-- Services -->
-                  <td class="px-8 py-6">
-                    {% if booking.services.exists %}
-                      <div class="flex flex-wrap gap-2 mb-2">
-                        {% for s in booking.services.all %}
-                          <span class="inline-flex items-center px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-200">{{ s.service_name }}</span>
-                        {% endfor %}
-                      </div>
-                      <div class="text-sm font-bold text-indigo-600">Total: {{ booking.total_duration }} min · ₹{{ booking.total_price }}</div>
-                    {% elif booking.service %}
-                      <div class="font-bold text-slate-900 mb-1">{{ booking.service.service_name }}</div>
-                      <div class="text-sm font-bold text-indigo-600">{{ booking.service.duration }} min · ₹{{ booking.service.price }}</div>
-                    {% else %}
-                      <div class="font-bold text-slate-400 italic">No service selected</div>
-                    {% endif %}
-
-                    {% if booking.notes %}
-                      <div class="mt-2 text-xs font-medium text-slate-500 truncate max-w-[200px]" title="{{ booking.notes }}">
-                        <span class="text-amber-600 font-bold">Note:</span> {{ booking.notes }}
-                      </div>
-                    {% endif %}
-                  </td>
-
-                  <!-- Schedule -->
-                  <td class="px-8 py-6">
-                    <div class="flex items-center gap-2 mb-1">
-                      <i data-lucide="calendar-days" class="w-4 h-4 text-slate-400"></i>
-                      <span class="font-bold text-slate-900">{{ booking.date|date:'D, M d, Y' }}</span>
-                    </div>
-                    <div class="flex items-center gap-2 mb-2">
-                      <i data-lucide="clock" class="w-4 h-4 text-slate-400"></i>
-                      <span class="text-slate-600 text-sm font-bold">{{ booking.start_time|time:'g:i A' }} - {{ booking.end_time|time:'g:i A' }}</span>
-                    </div>
-                    {% if booking.staff %}
-                      <div class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
-                        <i data-lucide="user" class="w-3.5 h-3.5"></i> {{ booking.staff.first_name }} {{ booking.staff.last_name }}
-                      </div>
-                    {% endif %}
-                  </td>
-
-                  <!-- Status -->
-                  <td class="px-8 py-6 text-center">
-                    {% if booking.status == 'pending' %}
-                      <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
-                        <span class="relative flex h-2 w-2">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                        </span>
-                        Pending
-                      </span>
-                    {% elif booking.status == 'confirmed' %}
-                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200"><i data-lucide="calendar-check" class="w-3.5 h-3.5"></i> Confirmed</span>
-                    {% elif booking.status == 'completed' %}
-                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Completed</span>
-                    {% elif booking.status == 'cancelled' %}
-                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200"><i data-lucide="x-circle" class="w-3.5 h-3.5"></i> Cancelled</span>
-                    {% endif %}
-                  </td>
-
-                  <!-- Actions -->
-                  <td class="px-8 py-6 text-right">
-                    <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <a href="{% url 'dashboard:booking_manage' booking.pk %}" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors tooltip" title="Manage Booking"><i data-lucide="settings-2" class="w-5 h-5"></i></a>
-                      {% if booking.status == 'pending' %}
-                        <a href="{% url 'dashboard:update_booking_status' booking.pk 'confirmed' %}" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors tooltip" title="Accept Booking"><i data-lucide="check" class="w-5 h-5"></i></a>
-                        <a href="{% url 'dashboard:update_booking_status' booking.pk 'cancelled' %}" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors tooltip" title="Decline Booking"><i data-lucide="x" class="w-5 h-5"></i></a>
-                      {% elif booking.status == 'confirmed' %}
-                        <a href="{% url 'dashboard:update_booking_status' booking.pk 'completed' %}" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors tooltip" title="Mark Completed"><i data-lucide="check-circle" class="w-5 h-5"></i></a>
-                      {% endif %}
-                    </div>
-
-                    <!-- Mobile Actions (Always visible) -->
-                    <div class="sm:hidden flex flex-col gap-2 mt-4 border-t border-slate-100 pt-4">
-                      <a href="{% url 'dashboard:booking_manage' booking.pk %}" class="text-center px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-lg text-sm">Manage</a>
-                    </div>
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+    
+    <div class="flex flex-wrap items-center gap-4">
+      <!-- Auto-Accept Toggle -->
+      <form method="POST" action="{% url 'dashboard:bookings' %}" class="flex items-center gap-3 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_preferences">
+        <div class="flex flex-col">
+          <span class="text-sm font-black text-slate-700 leading-tight">Auto-Accept</span>
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">New Bookings</span>
         </div>
-      {% else %}
-        <div class="flex flex-col items-center justify-center text-center py-32 px-4">
-          <div class="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-6 border-8 border-indigo-50/50">
-            <i data-lucide="calendar-x" class="w-10 h-10 text-indigo-400"></i>
-          </div>
-          <h2 class="text-2xl font-black text-slate-900 mb-2">No bookings yet</h2>
-          <p class="text-slate-500 font-medium max-w-md mb-8">When customers book your services, their appointments will appear here.</p>
-          <a href="{% url 'dashboard:calendar' %}" class="px-6 py-3 bg-slate-900 hover:bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-indigo-500/25 transition-all">View Calendar</a>
-        </div>
-      {% endif %}
+        <label class="relative inline-flex items-center cursor-pointer ml-2">
+          <input type="checkbox" name="auto_accept_bookings" value="on" class="sr-only peer" {% if business.auto_accept_bookings %}checked{% endif %} onchange="this.form.submit()">
+          <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+        </label>
+      </form>
+
+      <a href="{% url 'dashboard:calendar' %}" class="flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-md hover:shadow-lg hover:shadow-indigo-500/30 transition-all">
+        <i data-lucide="calendar" class="w-5 h-5"></i>
+        <span class="hidden sm:inline">Calendar View</span>
+      </a>
     </div>
   </div>
+
+  <!-- Alerts -->
+  {% if messages %}
+    <div class="space-y-3">
+      {% for message in messages %}
+        <div class="p-4 {% if message.tags == 'error' %}bg-rose-50 text-rose-800 border-rose-200{% else %}bg-emerald-50 text-emerald-800 border-emerald-200{% endif %} border rounded-2xl flex items-center gap-3 shadow-sm font-medium">
+          {% if message.tags == 'error' %}<i data-lucide="alert-circle" class="w-5 h-5"></i>{% else %}<i data-lucide="check-circle" class="w-5 h-5"></i>{% endif %}
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Modern Bookings List -->
+  <div class="space-y-4">
+    {% if bookings %}
+      {% for booking in bookings %}
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md hover:border-indigo-200 transition-all group flex flex-col md:flex-row relative">
+          
+          <!-- Colored Status Edge -->
+          <div class="absolute left-0 top-0 bottom-0 w-2 
+            {% if booking.status == 'pending' %}bg-amber-400
+            {% elif booking.status == 'confirmed' %}bg-indigo-500
+            {% elif booking.status == 'completed' %}bg-emerald-500
+            {% elif booking.status == 'cancelled' %}bg-rose-500{% endif %}">
+          </div>
+
+          <!-- Customer Info -->
+          <div class="p-6 pl-8 flex-1 border-b md:border-b-0 md:border-r border-slate-100 flex items-start gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-600 font-black text-lg flex items-center justify-center shrink-0 shadow-inner">
+              {{ booking.customer.first_name|default:booking.customer.username|slice:':1'|upper }}
+            </div>
+            <div>
+              <h3 class="text-lg font-black text-slate-900 mb-1 leading-tight">
+                {% if booking.customer.first_name or booking.customer.last_name %}{{ booking.customer.first_name }} {{ booking.customer.last_name }}{% else %}Guest Customer{% endif %}
+              </h3>
+              <div class="flex flex-col gap-1 text-sm font-medium text-slate-500">
+                {% if booking.display_phone %}
+                  <span class="flex items-center gap-1.5 text-slate-700 font-bold"><i data-lucide="phone" class="w-3.5 h-3.5"></i> {{ booking.display_phone }}</span>
+                {% else %}
+                  <span class="flex items-center gap-1.5"><i data-lucide="mail" class="w-3.5 h-3.5"></i> {{ booking.customer.email|default:'No contact info' }}</span>
+                {% endif %}
+              </div>
+              
+              <!-- Services Badge -->
+              <div class="mt-4">
+                {% if booking.services.exists %}
+                  <div class="flex flex-wrap gap-1.5">
+                    {% for s in booking.services.all %}
+                      <span class="px-2.5 py-1 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg">{{ s.service_name }}</span>
+                    {% endfor %}
+                  </div>
+                {% elif booking.service %}
+                  <span class="px-2.5 py-1 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg">{{ booking.service.service_name }}</span>
+                {% else %}
+                  <span class="px-2.5 py-1 bg-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded-lg">No Service</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Schedule Info -->
+          <div class="p-6 md:w-64 shrink-0 bg-slate-50/50 flex flex-col justify-center">
+            <div class="flex flex-col gap-3">
+              <div>
+                <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Date</span>
+                <div class="flex items-center gap-2 font-bold text-slate-900">
+                  <i data-lucide="calendar-days" class="w-4 h-4 text-indigo-500"></i> {{ booking.date|date:'M d, Y' }}
+                </div>
+              </div>
+              <div>
+                <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Time</span>
+                <div class="flex items-center gap-2 font-bold text-slate-900">
+                  <i data-lucide="clock" class="w-4 h-4 text-indigo-500"></i> {{ booking.start_time|time:'g:i A' }}
+                </div>
+              </div>
+              {% if booking.total_price or booking.service.price %}
+              <div>
+                 <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Price</span>
+                 <div class="font-black text-indigo-600">
+                   &#8377;{% if booking.total_price %}{{ booking.total_price }}{% else %}{{ booking.service.price }}{% endif %}
+                 </div>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Actions & Status -->
+          <div class="p-6 md:w-56 shrink-0 flex flex-col justify-between items-end border-t md:border-t-0 md:border-l border-slate-100">
+            
+            <!-- Status Badge -->
+            <div class="mb-4 w-full text-right">
+              {% if booking.status == 'pending' %}
+                <span class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200 w-full md:w-auto">
+                  <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span></span>
+                  Pending
+                </span>
+              {% elif booking.status == 'confirmed' %}
+                <span class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200 w-full md:w-auto"><i data-lucide="calendar-check" class="w-3.5 h-3.5"></i> Confirmed</span>
+              {% elif booking.status == 'completed' %}
+                <span class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 w-full md:w-auto"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Completed</span>
+              {% elif booking.status == 'cancelled' %}
+                <span class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200 w-full md:w-auto"><i data-lucide="x-circle" class="w-3.5 h-3.5"></i> Cancelled</span>
+              {% endif %}
+            </div>
+
+            <!-- Primary Action Buttons -->
+            <div class="flex flex-col gap-2 w-full">
+              {% if booking.status == 'pending' %}
+                <div class="flex gap-2 w-full">
+                  <a href="{% url 'dashboard:update_booking_status' booking.pk 'confirmed' %}" {% if booking.has_phone %}onclick="window.open('{{ booking.get_whatsapp_url_confirmed|escapejs }}', '_blank');"{% endif %} class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-colors shadow-sm text-sm">
+                    <i data-lucide="check" class="w-4 h-4"></i> Accept
+                  </a>
+                  <a href="{% url 'dashboard:update_booking_status' booking.pk 'cancelled' %}" {% if booking.has_phone %}onclick="window.open('{{ booking.get_whatsapp_url_cancelled|escapejs }}', '_blank');"{% endif %} class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold rounded-xl transition-colors text-sm">
+                    <i data-lucide="x" class="w-4 h-4"></i> Decline
+                  </a>
+                </div>
+              {% elif booking.status == 'confirmed' %}
+                <a href="{% url 'dashboard:update_booking_status' booking.pk 'completed' %}" {% if booking.has_phone %}onclick="window.open('{{ booking.get_whatsapp_url_completed|escapejs }}', '_blank');"{% endif %} class="w-full flex items-center justify-center gap-1.5 py-2 bg-slate-900 hover:bg-indigo-600 text-white font-bold rounded-xl transition-colors shadow-sm text-sm">
+                  <i data-lucide="check-circle" class="w-4 h-4"></i> Complete
+                </a>
+              {% endif %}
+
+              <!-- Secondary Actions Row -->
+              <div class="flex gap-2 w-full mt-1">
+                <a href="{% url 'dashboard:booking_manage' booking.pk %}" class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors text-sm">
+                  <i data-lucide="settings-2" class="w-4 h-4"></i> Manage
+                </a>
+                {% if booking.has_phone %}
+                  <a href="{{ booking.get_whatsapp_url }}" target="_blank" class="flex items-center justify-center px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 font-bold rounded-xl transition-colors tooltip" title="Message Customer">
+                    <i data-lucide="message-circle" class="w-5 h-5"></i>
+                  </a>
+                {% endif %}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="flex flex-col items-center justify-center text-center py-24 px-4 bg-white rounded-3xl border border-slate-200 shadow-sm">
+        <div class="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-6 border-8 border-indigo-50/50">
+          <i data-lucide="calendar-x" class="w-10 h-10 text-indigo-400"></i>
+        </div>
+        <h2 class="text-2xl font-black text-slate-900 mb-2">No bookings yet</h2>
+        <p class="text-slate-500 font-medium max-w-md mx-auto mb-8">When customers book your services, their appointments will appear here.</p>
+        <a href="{% url 'dashboard:calendar' %}" class="px-6 py-3 bg-slate-900 hover:bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-indigo-500/25 transition-all">View Calendar</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}
+

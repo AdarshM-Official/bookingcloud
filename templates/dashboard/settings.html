@@ -1,4 +1,4 @@
-﻿{% extends 'dashboard/base.html' %}
+{% extends 'dashboard/base.html' %}
 
 {% block page_title %}Settings{% endblock %}
 {% block breadcrumbs %}
@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block content %}
+<div class="max-w-4xl mx-auto pb-12">
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
     <div>
       <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Settings</h1>
@@ -14,11 +15,187 @@
     </div>
   </div>
 
-  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col items-center justify-center text-center py-24 px-4">
-    <div class="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center mb-6">
-      <i data-lucide="settings" class="w-10 h-10 text-brand-600"></i>
+  {% if messages %}
+    <div class="mb-8 space-y-3">
+      {% for message in messages %}
+        <div class="p-4 rounded-xl font-bold flex items-center gap-3 shadow-sm {% if message.tags == 'error' %}bg-rose-50 text-rose-700 border border-rose-100{% else %}bg-emerald-50 text-emerald-800 border border-emerald-100{% endif %}">
+          {% if message.tags == 'error' %}
+            <i data-lucide="alert-circle" class="w-5 h-5 text-rose-500"></i>
+          {% else %}
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>
+          {% endif %}
+          {{ message }}
+        </div>
+      {% endfor %}
     </div>
-    <h2 class="text-2xl font-bold text-slate-900 mb-2">Settings is coming soon</h2>
-    <p class="text-slate-500 font-medium max-w-md">We are currently working on this feature. It will be available in a future update.</p>
+  {% endif %}
+
+  <!-- Settings Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    
+    <!-- Sidebar / Tabs -->
+    <div class="space-y-2">
+      <a href="#" class="flex items-center justify-between px-4 py-3 bg-brand-50 text-brand-700 font-bold rounded-xl border border-brand-100">
+        <div class="flex items-center gap-3">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+          Security
+        </div>
+      </a>
+      <a href="{% url 'dashboard:profile' %}" class="flex items-center justify-between px-4 py-3 text-slate-600 font-medium rounded-xl hover:bg-slate-50 transition-colors">
+        <div class="flex items-center gap-3">
+          <i data-lucide="store" class="w-5 h-5"></i>
+          Business Profile
+        </div>
+      </a>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="md:col-span-2 space-y-6">
+      
+      <!-- Security / Password Reset Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden" x-data="passwordReset()">
+        <div class="p-6 sm:p-8 border-b border-slate-100">
+          <h2 class="text-xl font-extrabold text-slate-900 mb-2">Change Password</h2>
+          <p class="text-slate-500 font-medium text-sm">Update your account password securely using a one-time password (OTP) sent to your registered number <strong>{{ business.phone|default:"(No phone added)" }}</strong>.</p>
+        </div>
+
+        <div class="p-6 sm:p-8">
+          
+          <!-- Step 1: Send OTP -->
+          <div x-show="step === 1">
+            <button type="button" @click="sendOtp()" :disabled="isLoading" class="flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-brand-600 text-white font-bold rounded-xl shadow-sm transition-all disabled:opacity-50">
+              <i data-lucide="smartphone" class="w-5 h-5" x-show="!isLoading"></i>
+              <svg class="animate-spin w-5 h-5 text-white" x-show="isLoading" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <span x-text="isLoading ? 'Sending...' : 'Send OTP to my number'"></span>
+            </button>
+            <p x-show="errorMsg" x-text="errorMsg" class="mt-3 text-sm font-bold text-rose-600"></p>
+          </div>
+
+          <!-- Step 2: Enter OTP and New Password -->
+          <form method="POST" action="{% url 'dashboard:settings' %}" x-show="step === 2" x-cloak class="space-y-6">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="change_password">
+            
+            <div class="p-4 bg-emerald-50 border border-emerald-100 rounded-xl mb-6 flex items-start gap-3">
+              <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+              <div>
+                <p class="text-sm font-bold text-emerald-800" x-text="successMsg"></p>
+                <p class="text-xs text-emerald-600 font-medium mt-1">Please check your phone (or console logs in development).</p>
+              </div>
+            </div>
+
+            <div>
+              <label for="otp" class="block text-sm font-bold text-slate-700 mb-2">6-Digit OTP</label>
+              <input type="text" name="otp" id="otp" required pattern="\d{6}" maxlength="6" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all tracking-widest text-lg" placeholder="••••••">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label for="new_password" class="block text-sm font-bold text-slate-700 mb-2">New Password</label>
+                <input type="password" name="new_password" id="new_password" required minlength="8" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all">
+              </div>
+              <div>
+                <label for="confirm_password" class="block text-sm font-bold text-slate-700 mb-2">Confirm Password</label>
+                <input type="password" id="confirm_password" required minlength="8" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all">
+                <p x-show="pwdMismatch" class="text-xs font-bold text-rose-600 mt-2">Passwords do not match.</p>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <button type="button" @click="step = 1" class="text-sm font-bold text-slate-500 hover:text-slate-700">Cancel</button>
+              <button type="submit" @click="checkPasswords($event)" class="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-sm shadow-brand-200 transition-all">Update Password</button>
+            </div>
+          </form>
+
+        </div>
+      
+      <!-- Booking Preferences Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-6">
+        <div class="p-6 sm:p-8 border-b border-slate-100">
+          <h2 class="text-xl font-extrabold text-slate-900 mb-2">Booking Preferences</h2>
+          <p class="text-slate-500 font-medium text-sm">Configure how incoming bookings are handled by the system.</p>
+        </div>
+        <div class="p-6 sm:p-8">
+          <form method="POST" action="{% url 'dashboard:settings' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_preferences">
+            
+            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+              <div>
+                <h3 class="font-bold text-slate-900">Auto-Accept Bookings</h3>
+                <p class="text-sm font-medium text-slate-500 mt-1">If enabled, new bookings will be automatically marked as Confirmed. If disabled, they will be marked as Pending and require your manual approval.</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                <input type="checkbox" name="auto_accept_bookings" class="sr-only peer" {% if business.auto_accept_bookings %}checked{% endif %} onchange="this.form.submit()">
+                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+              </label>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+    </div>
   </div>
+</div>
+
+<script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('passwordReset', () => ({
+      step: 1,
+      isLoading: false,
+      errorMsg: '',
+      successMsg: '',
+      pwdMismatch: false,
+      
+      async sendOtp() {
+        if (this.isLoading) return;
+        this.isLoading = true;
+        this.errorMsg = '';
+        
+        try {
+          const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+          const formData = new FormData();
+          formData.append('action', 'send_otp');
+          formData.append('csrfmiddlewaretoken', csrfToken);
+          
+          const response = await fetch("{% url 'dashboard:settings' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Server returned ${response.status}`);
+          }
+          
+          const data = await response.json();
+          if (data.success) {
+            this.successMsg = data.message;
+            this.step = 2;
+          } else {
+            this.errorMsg = "Failed to send OTP. Please try again.";
+          }
+        } catch (e) {
+          console.error(e);
+          this.errorMsg = "Error: Could not connect to server.";
+        } finally {
+          this.isLoading = false;
+        }
+      },
+      
+      checkPasswords(e) {
+        const pwd1 = document.getElementById('new_password').value;
+        const pwd2 = document.getElementById('confirm_password').value;
+        if(pwd1 !== pwd2) {
+          e.preventDefault();
+          this.pwdMismatch = true;
+        } else {
+          this.pwdMismatch = false;
+        }
+      }
+    }));
+  });
+</script>
 {% endblock %}

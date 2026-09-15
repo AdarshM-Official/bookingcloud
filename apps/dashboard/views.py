@@ -198,6 +198,15 @@ def bookings_view(request):
     business = _get_business_or_redirect(request)
     if not business: return redirect('dashboard:onboarding')
     
+    if request.method == 'POST' and request.POST.get('action') == 'update_preferences':
+        auto_accept = request.POST.get('auto_accept_bookings') == 'on'
+        business.auto_accept_bookings = auto_accept
+        business.save()
+        from django.contrib import messages
+        status_text = "enabled" if auto_accept else "disabled"
+        messages.success(request, f"Auto-accept bookings is now {status_text}.")
+        return redirect('dashboard:bookings')
+    
     bookings = business.bookings.all().order_by('-date', '-start_time')
     return render(request, 'dashboard/bookings.html', {'business': business, 'bookings': bookings})
 
@@ -269,12 +278,6 @@ def booking_manage_view(request, pk):
     return render(request, 'dashboard/booking_manage.html', {'business': business, 'booking': booking})
 
 @login_required
-def customers_view(request):
-    business = _get_business_or_redirect(request)
-    if not business: return redirect('dashboard:onboarding')
-    return render(request, 'dashboard/customers.html', {'business': business})
-
-@login_required
 def availability_view(request):
     business = _get_business_or_redirect(request)
     if not business: return redirect('dashboard:onboarding')
@@ -334,12 +337,6 @@ def availability_view(request):
     return render(request, 'dashboard/availability.html', {'business': business, 'time_offs': time_offs})
 
 @login_required
-def analytics_view(request):
-    business = _get_business_or_redirect(request)
-    if not business: return redirect('dashboard:onboarding')
-    return render(request, 'dashboard/analytics.html', {'business': business})
-
-@login_required
 def profile_view(request):
     business = _get_business_or_redirect(request)
     if not business: return redirect('dashboard:onboarding')
@@ -352,6 +349,8 @@ def profile_view(request):
         business.email = request.POST.get('email', business.email).strip()
         business.address = request.POST.get('address', business.address).strip()
         business.city = request.POST.get('city', business.city).strip()
+        
+        business.auto_accept_bookings = request.POST.get('auto_accept_bookings') == 'on'
         
         if 'profile_image' in request.FILES:
             business.profile_image = request.FILES['profile_image']
@@ -384,9 +383,67 @@ def gallery_image_delete(request, pk):
 def settings_view(request):
     business = _get_business_or_redirect(request)
     if not business: return redirect('dashboard:onboarding')
+    
+    from django.contrib.auth import update_session_auth_hash
+    from django.contrib import messages
+    import random
+    import time
+    from django.http import JsonResponse
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'send_otp':
+            # Generate a 6-digit OTP
+            otp = str(random.randint(100000, 999999))
+            request.session['pwd_otp'] = otp
+            request.session['pwd_otp_expiry'] = time.time() + 300 # 5 minutes expiry
+            
+            phone = business.phone or "your registered number"
+            
+            # SIMULATE SENDING SMS
+            print(f"\n{'='*40}")
+            print(f"SMS SENT TO {phone}")
+            print(f"Your BookingCloud Password Reset OTP is: {otp}")
+            print(f"{'='*40}\n")
+            
+            return JsonResponse({'success': True, 'message': f'OTP sent to {phone}'})
+            
+        elif action == 'change_password':
+            otp_entered = request.POST.get('otp')
+            new_password = request.POST.get('new_password')
+            
+            saved_otp = request.session.get('pwd_otp')
+            expiry = request.session.get('pwd_otp_expiry', 0)
+            
+            if not saved_otp or time.time() > expiry:
+                messages.error(request, "OTP expired or not requested.")
+            elif otp_entered != saved_otp:
+                messages.error(request, "Invalid OTP.")
+            elif len(new_password) < 8:
+                messages.error(request, "Password must be at least 8 characters.")
+            else:
+                # Success
+                user = request.user
+                user.set_password(new_password)
+                user.save()
+                update_session_auth_hash(request, user)  # Keep user logged in
+                del request.session['pwd_otp']
+                del request.session['pwd_otp_expiry']
+                messages.success(request, "Password updated successfully!")
+                
+            return redirect('dashboard:settings')
+            
+        elif action == 'update_preferences':
+            auto_accept = request.POST.get('auto_accept_bookings') == 'on'
+            business.auto_accept_bookings = auto_accept
+            business.save()
+            
+            status_text = "enabled" if auto_accept else "disabled"
+            messages.success(request, f"Auto-accept bookings is now {status_text}.")
+            return redirect('dashboard:settings')
+
     return render(request, 'dashboard/settings.html', {'business': business})
-
-
 @login_required
 def staff_list_view(request):
     business = _get_business_or_redirect(request)
@@ -729,3 +786,20 @@ def payroll_list_view(request):
         'total_paid': total_paid,
         'total_pending': total_pending
     })
+
+
+
+@login_required
+def support_view(request):
+    business = _get_business_or_redirect(request)
+    if not business: return redirect('dashboard:onboarding')
+    
+    from django.contrib import messages
+    if request.method == 'POST':
+        subject = request.POST.get('subject')
+        message = request.POST.get('message')
+        # Simulate sending email/creating ticket
+        messages.success(request, "Your support request has been sent! We will get back to you within 24 hours.")
+        return redirect('dashboard:support')
+        
+    return render(request, 'dashboard/support.html', {'business': business})

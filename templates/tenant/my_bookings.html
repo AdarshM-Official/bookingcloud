@@ -1,25 +1,115 @@
 ﻿{% extends 'tenant/base.html' %}
 
-{% block page_title %}Booking Confirmed | {{ tenant.business_name }}{% endblock %}
+{% block page_title %}My Bookings | {{ tenant.business_name }}{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     
-    <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
-        <i data-lucide="check-circle" class="w-10 h-10"></i>
+    {% if messages %}
+        <div class="mb-10 space-y-4">
+            {% for message in messages %}
+                <div class="p-6 bg-emerald-50 border border-emerald-100 rounded-2xl flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4">
+                        <i data-lucide="check-circle" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-2xl font-black text-slate-900 mb-2">{{ message }}</h2>
+                    <p class="text-slate-600 font-medium">Thank you for choosing <span class="font-bold text-tenant">{{ tenant.business_name }}</span>.</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-black text-slate-900">My Bookings</h1>
+            <p class="text-slate-500 font-medium mt-1">Manage your appointments with {{ tenant.business_name }}.</p>
+        </div>
+        {% if customer_phone %}
+            <form method="POST" action="{% url 'tenant_my_bookings' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="logout">
+                <button type="submit" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors text-sm flex items-center gap-2">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out
+                </button>
+            </form>
+        {% endif %}
     </div>
-    
-    <h1 class="text-3xl font-black text-slate-900 mb-4">Request Received!</h1>
-    
-    <p class="text-lg text-slate-600 font-medium mb-10 leading-relaxed">
-        Thank you for choosing <span class="font-bold text-tenant">{{ tenant.business_name }}</span>. We have received your booking request and will contact you shortly to confirm the details.
-    </p>
 
-    <div class="space-x-4">
-        <a href="{% url 'tenant_home' %}" class="inline-block px-8 py-4 bg-tenant text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:opacity-90 transition-all">
-            Return Home
-        </a>
-    </div>
+    {% if not customer_phone %}
+        <!-- Login Form -->
+        <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200 p-8 sm:p-10 text-center max-w-md mx-auto">
+            <div class="w-16 h-16 bg-tenant/10 text-tenant rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="smartphone" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900 mb-2">Access Your Bookings</h2>
+            <p class="text-slate-500 font-medium mb-8">Enter your phone number to view or manage your appointments.</p>
+            
+            <form method="POST" action="{% url 'tenant_my_bookings' %}" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="login">
+                <div>
+                    <input type="tel" name="phone" required pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-bold text-slate-900 focus:ring-2 focus:ring-tenant outline-none transition-all placeholder:text-slate-400 placeholder:font-medium" placeholder="Enter phone number">
+                </div>
+                <button type="submit" class="w-full py-4 bg-tenant text-white font-black rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-tenant/30">
+                    View My Bookings
+                </button>
+            </form>
+        </div>
+    {% else %}
+        <!-- Bookings List -->
+        {% if bookings %}
+            <div class="space-y-6">
+                {% for booking in bookings %}
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex gap-5 items-start">
+                            <div class="w-14 h-14 rounded-xl flex flex-col items-center justify-center shrink-0 {% if booking.status == 'confirmed' %}bg-emerald-100 text-emerald-700{% elif booking.status == 'pending' %}bg-amber-100 text-amber-700{% elif booking.status == 'cancelled' %}bg-rose-100 text-rose-700{% else %}bg-slate-100 text-slate-700{% endif %}">
+                                <span class="text-xs font-bold uppercase">{{ booking.date|date:"M" }}</span>
+                                <span class="text-lg font-black leading-none mt-0.5">{{ booking.date|date:"d" }}</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900 mb-1">
+                                    {% if booking.service %}
+                                        {{ booking.service.service_name }}
+                                    {% else %}
+                                        {% for s in booking.services.all %}
+                                            {{ s.service_name }}{% if not forloop.last %}, {% endif %}
+                                        {% empty %}
+                                            Custom Service
+                                        {% endfor %}
+                                    {% endif %}
+                                </h3>
+                                <div class="flex flex-wrap items-center gap-4 text-sm font-medium text-slate-500">
+                                    <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4"></i> {{ booking.start_time|time:"g:i A" }}</span>
+                                    <span class="flex items-center gap-1.5"><i data-lucide="user" class="w-4 h-4"></i> {{ booking.staff.first_name }} {{ booking.staff.last_name }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="w-full md:w-auto flex items-center justify-between md:justify-end gap-4 border-t md:border-t-0 border-slate-100 pt-4 md:pt-0">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
+                                {% if booking.status == 'confirmed' %}bg-emerald-100 text-emerald-700
+                                {% elif booking.status == 'pending' %}bg-amber-100 text-amber-700
+                                {% elif booking.status == 'cancelled' %}bg-rose-100 text-rose-700
+                                {% else %}bg-slate-100 text-slate-700{% endif %}">
+                                {{ booking.status }}
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
+                <div class="w-20 h-20 bg-slate-200 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="calendar-x" class="w-10 h-10"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">No bookings found</h3>
+                <p class="text-slate-500 font-medium mb-6">We couldn't find any appointments linked to <strong>{{ customer_phone }}</strong>.</p>
+                <a href="{% url 'tenant_services' %}" class="inline-flex px-6 py-3 bg-tenant text-white font-bold rounded-xl hover:opacity-90 transition-opacity">
+                    Book an Appointment
+                </a>
+            </div>
+        {% endif %}
+    {% endif %}
 
 </div>
 {% endblock %}

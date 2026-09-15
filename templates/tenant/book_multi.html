@@ -1,4 +1,4 @@
-{% extends 'tenant/base.html' %}
+﻿{% extends 'tenant/base.html' %}
 
 {% block page_title %}
   Book Multiple Services | {{ tenant.business_name }}
@@ -38,7 +38,7 @@
           {% for s in services %}
             <li class="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
               <span class="font-bold text-slate-700">{{ s.service_name }}</span>
-              <span class="text-sm font-medium text-slate-500">{{ s.duration }} min - ₹{{ s.price }}</span>
+              <span class="text-sm font-medium text-slate-500">{{ s.duration }} min - &#8377;{{ s.price }}</span>
             </li>
           {% endfor %}
         </ul>
@@ -49,7 +49,7 @@
           </div>
           <div class="text-right">
             <p class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Total Price</p>
-            <p class="text-2xl font-black text-tenant">₹{{ total_price }}</p>
+            <p class="text-2xl font-black text-tenant">&#8377;{{ total_price }}</p>
           </div>
         </div>
       </div>
@@ -184,3 +184,4 @@
     })
   </script>
 {% endblock %}
+

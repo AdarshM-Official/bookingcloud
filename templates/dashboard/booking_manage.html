@@ -1,4 +1,4 @@
-{% extends 'dashboard/base.html' %}
+﻿{% extends 'dashboard/base.html' %}
 
 {% block page_title %}
   Manage Booking
@@ -28,11 +28,11 @@
                     {{ booking.customer.first_name|default:booking.customer.username|slice:":1"|upper }}
                 </div>
                 <div>
-                    <h2 class="font-black text-slate-900 text-xl">{{ booking.customer.first_name }} {{ booking.customer.last_name }}</h2>
+                    <h2 class="font-black text-slate-900 text-xl">{% if booking.customer.first_name or booking.customer.last_name %}{{ booking.customer.first_name }} {{ booking.customer.last_name }}{% else %}Guest Customer{% endif %}</h2>
                     <div class="flex flex-col gap-1 text-sm font-medium text-slate-500 mt-1">
                         <span class="flex items-center gap-1.5"><i data-lucide="mail" class="w-4 h-4 text-slate-400"></i> {{ booking.customer.email|default:"No email provided" }}</span>
-                        {% if booking.customer_phone %}
-                            <span class="flex items-center gap-1.5"><i data-lucide="phone" class="w-4 h-4 text-slate-400"></i> {{ booking.customer_phone }}</span>
+                        {% if booking.has_phone %}
+                            <span class="flex items-center gap-1.5"><i data-lucide="phone" class="w-4 h-4 text-slate-400"></i> {{ booking.display_phone }}</span>
                             {% if booking.get_whatsapp_url %}
                                 <a href="{{ booking.get_whatsapp_url }}" target="_blank" class="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold rounded-lg transition-colors w-fit">
                                     <i data-lucide="message-circle" class="w-4 h-4"></i> Send via WhatsApp
@@ -51,10 +51,10 @@
                             <span class="font-bold text-slate-900 text-sm">{{ s.service_name }}</span>
                         {% endfor %}
                     </div>
-                    <div class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md inline-block">Total: {{ booking.total_duration }} min · ₹{{ booking.total_price }}</div>
+                    <div class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md inline-block">Total: {{ booking.total_duration }} min - &#8377;{{ booking.total_price }}</div>
                 {% elif booking.service %}
                     <p class="font-bold text-slate-900 text-sm mb-1">{{ booking.service.service_name }}</p>
-                    <div class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md inline-block">{{ booking.service.duration }} min · ₹{{ booking.service.price }}</div>
+                    <div class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md inline-block">{{ booking.service.duration }} min - &#8377;{{ booking.service.price }}</div>
                 {% endif %}
             </div>
         </div>
@@ -138,3 +138,6 @@
     </div>
 </div>
 {% endblock %}
+
+
+

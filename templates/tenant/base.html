@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
@@ -25,6 +25,10 @@
         :root {
             --brand-primary: {{ tenant.primary_color|default:'#111827' }};
             --brand-secondary: {{ tenant.secondary_color|default:'#f3f4f6' }};
+        }
+        
+        input[type="checkbox"]:checked + div .check-svg {
+            display: block !important;
         }
         
         .text-tenant { color: var(--brand-primary); }

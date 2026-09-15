@@ -26,6 +26,9 @@ class Business(models.Model):
     instagram_url = models.URLField(blank=True, null=True)
     website_url = models.URLField(blank=True, null=True)
     
+    # Preferences
+    auto_accept_bookings = models.BooleanField(default=False, help_text="Automatically confirm new bookings")
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -205,34 +208,74 @@ class Booking(models.Model):
 
     @property
     def service_label(self):
-        """Human-readable service name(s) for this booking."""
         if self.service:
             return self.service.service_name
-        if self.pk and self.services.exists():
+        elif self.pk and self.services.exists():
             return ", ".join(s.service_name for s in self.services.all())
         return "Appointment"
+        
+    @property
+    def has_phone(self):
+        return bool(
+            self.customer_phone or 
+            (self.customer and getattr(self.customer, 'phone_number', None)) or 
+            (self.customer and self.customer.username.isdigit()) or 
+            (self.customer and self.customer.username.startswith('user_') and self.customer.username[5:].isdigit())
+        )
+        
+    @property
+    def display_phone(self):
+        if self.customer_phone:
+            return self.customer_phone
+        if self.customer:
+            if getattr(self.customer, 'phone_number', None):
+                return self.customer.phone_number
+            if self.customer.username.isdigit():
+                return self.customer.username
+            if self.customer.username.startswith('user_') and self.customer.username[5:].isdigit():
+                return self.customer.username[5:]
+        return None
 
-    def get_whatsapp_url(self):
+    def get_whatsapp_url(self, target_status=None):
         """Generate a pre-filled wa.me link for notifying the customer."""
         import urllib.parse
-        phone = self.customer_phone.strip().replace(" ", "").replace("-", "").replace("+", "")
+        phone = self.display_phone
+            
+        if not phone:
+            return None
+            
+        phone = str(phone).strip().replace(" ", "").replace("-", "").replace("+", "")
         if not phone:
             return None
 
+        check_status = target_status or self.status
+
         status_messages = {
-            'pending':   f"Hello {self.customer.first_name or 'there'}! 👋 We have received your booking request for *{self.service_label}* at *{self.business.business_name}* on *{self.date.strftime('%B %d, %Y')}* at *{self.start_time.strftime('%I:%M %p')}*. We will confirm shortly!",
-            'confirmed': f"Great news, {self.customer.first_name or 'there'}! ✅ Your booking for *{self.service_label}* at *{self.business.business_name}* is *Confirmed* for *{self.date.strftime('%B %d, %Y')}* at *{self.start_time.strftime('%I:%M %p')}*. See you soon! 🙌",
-            'completed': f"Thank you for visiting *{self.business.business_name}*, {self.customer.first_name or 'there'}! 🌟 Your appointment for *{self.service_label}* is marked as completed. We hope you had a great experience!",
+            'pending':   f"Hello {self.customer.first_name or 'there'}! We have received your booking request for *{self.service_label}* at *{self.business.business_name}* on *{self.date.strftime('%B %d, %Y')}* at *{self.start_time.strftime('%I:%M %p')}*. We will confirm shortly!",
+            'confirmed': f"Great news, {self.customer.first_name or 'there'}! Your booking for *{self.service_label}* at *{self.business.business_name}* is *Confirmed* for *{self.date.strftime('%B %d, %Y')}* at *{self.start_time.strftime('%I:%M %p')}*. See you soon!",
+            'completed': f"Thank you for visiting *{self.business.business_name}*, {self.customer.first_name or 'there'}! Your appointment for *{self.service_label}* is marked as completed. We hope you had a great experience!",
             'cancelled': f"Hi {self.customer.first_name or 'there'}, we regret to inform you that your booking for *{self.service_label}* at *{self.business.business_name}* on *{self.date.strftime('%B %d, %Y')}* has been *Cancelled*. Please contact us to reschedule.",
         }
 
-        message = status_messages.get(self.status, f"Update on your booking at *{self.business.business_name}*: your appointment is now *{self.get_status_display()}*.")
+        message = status_messages.get(check_status, f"Update on your booking at *{self.business.business_name}*: your appointment is now *{check_status}*.")
 
         if self.business_message and self.business_message.strip():
-            message += f"\n\n📝 Message from us: {self.business_message.strip()}"
+            message += f"\n\nMessage from us: {self.business_message.strip()}"
 
         encoded = urllib.parse.quote(message)
         return f"https://wa.me/{phone}?text={encoded}"
+        
+    @property
+    def get_whatsapp_url_confirmed(self):
+        return self.get_whatsapp_url('confirmed')
+        
+    @property
+    def get_whatsapp_url_cancelled(self):
+        return self.get_whatsapp_url('cancelled')
+        
+    @property
+    def get_whatsapp_url_completed(self):
+        return self.get_whatsapp_url('completed')
 
     def __str__(self):
         if self.service:

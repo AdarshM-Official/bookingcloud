@@ -70,7 +70,7 @@ def tenant_book_service(request, service_id):
             
             # Since tenant users might not be logged in, get or create a user by email
             customer, created = User.objects.get_or_create(
-                username=email,
+                username=phone,
                 defaults={
                     'email': email,
                     'first_name': name,
@@ -78,6 +78,8 @@ def tenant_book_service(request, service_id):
                 }
             )
                 
+            status = 'confirmed' if tenant.auto_accept_bookings else 'pending'
+            
             Booking.objects.create(
                 business=tenant,
                 service=service,
@@ -87,10 +89,13 @@ def tenant_book_service(request, service_id):
                 date=booking_date,
                 start_time=booking_time,
                 end_time=end_time,
-                notes=f"Phone: {phone}\nName: {name}\n\n{notes}"
+                notes=f"Phone: {phone}\nName: {name}\n\n{notes}",
+                status=status
             )
             
-            messages.success(request, 'Booking successfully created! We will contact you soon.')
+            msg = "Your booking is confirmed!" if tenant.auto_accept_bookings else "Booking successfully requested! We will contact you soon."
+            messages.success(request, msg)
+            request.session['customer_phone'] = phone
             return redirect('tenant_my_bookings')
             
         except Exception as e:
@@ -107,9 +112,28 @@ def tenant_my_bookings(request):
     if not tenant or not tenant.is_published:
         return render(request, 'tenant/unavailable.html', status=403)
         
-    # In a full system, you would filter by logged-in customer or session.
-    # For now, we will show a placeholder or let them enter their email.
-    return render(request, 'tenant/my_bookings.html', {'tenant': tenant})
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'login':
+            phone = request.POST.get('phone')
+            if phone:
+                request.session['customer_phone'] = phone
+        elif action == 'logout':
+            if 'customer_phone' in request.session:
+                del request.session['customer_phone']
+            return redirect('tenant_my_bookings')
+            
+    customer_phone = request.session.get('customer_phone')
+    bookings = None
+    if customer_phone:
+        from apps.dashboard.models import Booking
+        bookings = Booking.objects.filter(business=tenant, customer_phone=customer_phone).order_by('-date', '-start_time')
+        
+    return render(request, 'tenant/my_bookings.html', {
+        'tenant': tenant, 
+        'customer_phone': customer_phone, 
+        'bookings': bookings
+    })
 
 def tenant_api_get_slots(request, service_id):
     tenant = get_tenant(request)
@@ -296,7 +320,7 @@ def tenant_book_multi_service(request):
             User = get_user_model()
             
             customer, created = User.objects.get_or_create(
-                username=email,
+                username=phone,
                 defaults={
                     'email': email,
                     'first_name': name,
@@ -304,6 +328,8 @@ def tenant_book_multi_service(request):
                 }
             )
                 
+            status = 'confirmed' if tenant.auto_accept_bookings else 'pending'
+            
             booking = Booking.objects.create(
                 business=tenant,
                 staff=selected_staff,
@@ -312,11 +338,14 @@ def tenant_book_multi_service(request):
                 date=booking_date,
                 start_time=booking_time,
                 end_time=end_time,
-                notes=f"Phone: {phone}\nName: {name}\n\n{notes}"
+                notes=f"Phone: {phone}\nName: {name}\n\n{notes}",
+                status=status
             )
             booking.services.set(services)
             
-            messages.success(request, 'Booking successfully created! We will contact you soon.')
+            msg = "Your booking is confirmed!" if tenant.auto_accept_bookings else "Booking successfully requested! We will contact you soon."
+            messages.success(request, msg)
+            request.session['customer_phone'] = phone
             return redirect('tenant_my_bookings')
             
         except Exception as e:
@@ -330,3 +359,4 @@ def tenant_book_multi_service(request):
         'service_ids_str': service_ids,
         'staff_members': staff_members
     })
+
