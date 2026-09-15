@@ -171,11 +171,19 @@ def calendar_view(request):
     bookings = business.bookings.all()
     events = []
     for booking in bookings:
+        # Support both single-service and multi-service bookings
+        if booking.service:
+            service_label = booking.service.service_name
+        elif booking.services.exists():
+            service_label = ", ".join(s.service_name for s in booking.services.all())
+        else:
+            service_label = "Appointment"
+
         events.append({
-            'title': f"{booking.service.service_name} - {booking.customer.get_full_name() or booking.customer.username}",
+            'title': f"{service_label} - {booking.customer.get_full_name() or booking.customer.username}",
             'start': f"{booking.date.isoformat()}T{booking.start_time.isoformat()}",
             'end': f"{booking.date.isoformat()}T{booking.end_time.isoformat()}",
-            'url': f"/dashboard/bookings/{booking.id}/", # Assuming you might add this later
+            'url': f"/dashboard/bookings/{booking.id}/",
             'className': f"status-{booking.status}"
         })
         

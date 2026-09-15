@@ -31,6 +31,14 @@
                     <h2 class="font-black text-slate-900 text-xl">{{ booking.customer.first_name }} {{ booking.customer.last_name }}</h2>
                     <div class="flex flex-col gap-1 text-sm font-medium text-slate-500 mt-1">
                         <span class="flex items-center gap-1.5"><i data-lucide="mail" class="w-4 h-4 text-slate-400"></i> {{ booking.customer.email|default:"No email provided" }}</span>
+                        {% if booking.customer_phone %}
+                            <span class="flex items-center gap-1.5"><i data-lucide="phone" class="w-4 h-4 text-slate-400"></i> {{ booking.customer_phone }}</span>
+                            {% if booking.get_whatsapp_url %}
+                                <a href="{{ booking.get_whatsapp_url }}" target="_blank" class="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold rounded-lg transition-colors w-fit">
+                                    <i data-lucide="message-circle" class="w-4 h-4"></i> Send via WhatsApp
+                                </a>
+                            {% endif %}
+                        {% endif %}
                     </div>
                 </div>
             </div>

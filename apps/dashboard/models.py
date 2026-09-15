@@ -180,6 +180,7 @@ class Booking(models.Model):
     services = models.ManyToManyField(Service, related_name='multi_bookings', blank=True)
     staff = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings')
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bookings')
+    customer_phone = models.CharField(max_length=20, blank=True, help_text="Customer phone number for WhatsApp")
     date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
@@ -201,6 +202,37 @@ class Booking(models.Model):
         if self.services.exists():
             return sum(s.price for s in self.services.all())
         return self.service.price if self.service else 0
+
+    @property
+    def service_label(self):
+        """Human-readable service name(s) for this booking."""
+        if self.service:
+            return self.service.service_name
+        if self.pk and self.services.exists():
+            return ", ".join(s.service_name for s in self.services.all())
+        return "Appointment"
+
+    def get_whatsapp_url(self):
+        """Generate a pre-filled wa.me link for notifying the customer."""
+        import urllib.parse
+        phone = self.customer_phone.strip().replace(" ", "").replace("-", "").replace("+", "")
+        if not phone:
+            return None
+
+        status_messages = {
+            'pending':   f"Hello {self.customer.first_name or 'there'}! 👋 We have received your booking request for *{self.service_label}* at *{self.business.business_name}* on *{self.date.strftime('%B %d, %Y')}* at *{self.start_time.strftime('%I:%M %p')}*. We will confirm shortly!",
+            'confirmed': f"Great news, {self.customer.first_name or 'there'}! ✅ Your booking for *{self.service_label}* at *{self.business.business_name}* is *Confirmed* for *{self.date.strftime('%B %d, %Y')}* at *{self.start_time.strftime('%I:%M %p')}*. See you soon! 🙌",
+            'completed': f"Thank you for visiting *{self.business.business_name}*, {self.customer.first_name or 'there'}! 🌟 Your appointment for *{self.service_label}* is marked as completed. We hope you had a great experience!",
+            'cancelled': f"Hi {self.customer.first_name or 'there'}, we regret to inform you that your booking for *{self.service_label}* at *{self.business.business_name}* on *{self.date.strftime('%B %d, %Y')}* has been *Cancelled*. Please contact us to reschedule.",
+        }
+
+        message = status_messages.get(self.status, f"Update on your booking at *{self.business.business_name}*: your appointment is now *{self.get_status_display()}*.")
+
+        if self.business_message and self.business_message.strip():
+            message += f"\n\n📝 Message from us: {self.business_message.strip()}"
+
+        encoded = urllib.parse.quote(message)
+        return f"https://wa.me/{phone}?text={encoded}"
 
     def __str__(self):
         if self.service:
